@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="elevation">10dp</dimen>
+    <dimen name="maxWidth">150dp</dimen>
+
+    <dimen name="margin">10dp</dimen>
+    <dimen name="padding">8dp</dimen>
+    <dimen name="arrow_width">20dp</dimen>
+    <dimen name="arrow_height">15dp</dimen>
+</resources>
