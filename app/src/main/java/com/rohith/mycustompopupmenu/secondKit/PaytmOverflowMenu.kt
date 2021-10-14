@@ -1,4 +1,3 @@
-
 package com.rohith.mycustompopupmenu.secondKit
 
 import android.annotation.SuppressLint
@@ -31,17 +30,8 @@ import com.rohith.mycustompopupmenu.CustomPopupWindow
 import com.rohith.mycustompopupmenu.databinding.LayoutCustomPopupMenuBinding
 import com.rohith.mycustompopupmenu.secondKit.annotations.Dp
 import com.rohith.mycustompopupmenu.secondKit.annotations.Sp
-import com.rohith.mycustompopupmenu.secondKit.util.*
+import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.*
 import kotlin.math.max
-import kotlin.math.roundToInt
-import android.util.DisplayMetrics
-import android.view.Gravity
-
-
-
-
-
-
 
 
 /**
@@ -54,343 +44,240 @@ import android.view.Gravity
  */
 @Suppress("MemberVisibilityCanBePrivate")
 class PaytmOverflowMenu(
-  private val context: Context,
-  private val builder: Builder
+    private val context: Context,
+    private val builder: Builder
 ) : LifecycleObserver {
 
-  /** A main content view of the popup. */
-  private val binding: LayoutCustomPopupMenuBinding =
-    LayoutCustomPopupMenuBinding.inflate(LayoutInflater.from(context), null, false)
+    /** A main content view of the popup. */
+    private val binding: LayoutCustomPopupMenuBinding =
+        LayoutCustomPopupMenuBinding.inflate(LayoutInflater.from(context), null, false)
 
 
-  /** A main content window of the popup. */
-  val bodyWindow: CustomPopupWindow = CustomPopupWindow(context,
-    binding.root,
-    FrameLayout.LayoutParams.WRAP_CONTENT,
-    FrameLayout.LayoutParams.WRAP_CONTENT
-  )
+    /** A main content window of the popup. */
+    val bodyWindow: CustomPopupWindow = CustomPopupWindow(
+        context,
+        binding.root,
+        FrameLayout.LayoutParams.WRAP_CONTENT,
+        FrameLayout.LayoutParams.WRAP_CONTENT
+    )
 
 
-  /** Denotes the popup is showing or not. */
-  var isShowing = false
-    private set
+    /** Denotes the popup is showing or not. */
+    var isShowing = false
+        private set
 
-  /** Denotes the popup is already destroyed internally. */
-  private var destroyed: Boolean = false
+    /** Denotes the popup is already destroyed internally. */
+    private var destroyed: Boolean = false
 
-  /** Interface definition for a callback to be invoked when a popupmenu view is initialized. */
-  @JvmField
-  var onPopupMenuInitializedListener: OnPopupMenuInitializedListener? =
-    builder.onPopupMenuInitializedListener
+    /** Interface definition for a callback to be invoked when a popupmenu view is initialized. */
+    @JvmField
+    var onPopupMenuInitializedListener: OnPopupMenuInitializedListener? =
+        builder.onPopupMenuInitializedListener
 
-  /** A handler for running [autoDismissRunnable]. */
-  private val handler: Handler by lazy(LazyThreadSafetyMode.NONE) {
-    Handler(Looper.getMainLooper())
-  }
-
-  /** A runnable for dismissing the popupmenu with the [Builder.autoDismissDuration]. */
-  private val autoDismissRunnable: AutoDismissRunnable by lazy(
-    LazyThreadSafetyMode.NONE
-  ) { AutoDismissRunnable(this) }
-
-
-
-  init {
-    createByBuilder()
-  }
-
-  private fun createByBuilder() {
-    initializeBackground()
-    initializepopupmenuRoot()
-    initializepopupmenuWindow()
-    initializepopupmenuLayout()
-    initializepopupmenuContent()
-    initializepopupmenuListeners()
-
-    adjustFitsSystemWindows(binding.root)
-
-    if (builder.lifecycleOwner == null && context is LifecycleOwner) {
-      builder.setLifecycleOwner(context)
-      context.lifecycle.addObserver(this@PaytmOverflowMenu)
-    } else {
-      builder.lifecycleOwner?.lifecycle?.addObserver(this@PaytmOverflowMenu)
+    /** A handler for running [autoDismissRunnable]. */
+    private val handler: Handler by lazy(LazyThreadSafetyMode.NONE) {
+        Handler(Looper.getMainLooper())
     }
-  }
 
-  private fun adjustFitsSystemWindows(parent: ViewGroup) {
-    parent.fitsSystemWindows = false
-    (0 until parent.childCount).map { parent.getChildAt(it) }.forEach { child ->
-      child.fitsSystemWindows = false
-      if (child is ViewGroup) {
-        adjustFitsSystemWindows(child)
-      }
+    /** A runnable for dismissing the popupmenu with the [Builder.autoDismissDuration]. */
+    private val autoDismissRunnable: AutoDismissRunnable by lazy(
+        LazyThreadSafetyMode.NONE
+    ) { AutoDismissRunnable(this) }
+
+
+    init {
+        createByBuilder()
     }
-  }
 
-  private fun getMinArrowPosition(): Float {
-    return (builder.arrowSize.toFloat() * builder.arrowAlignAnchorPaddingRatio) +
-      builder.arrowAlignAnchorPadding
-  }
+    private fun createByBuilder() {
+        initializeBackground()
+        initializepopupmenuRoot()
+        initializepopupmenuWindow()
+        initializepopupmenuLayout()
+        initializepopupmenuContent()
+        initializepopupmenuListeners()
 
+        adjustFitsSystemWindows(binding.root)
 
-  private fun getMaxArrowPosition(): Float{
-    return getMeasuredWidth().toFloat() - builder.arrowSize - SIZE_ARROW_BOUNDARY - getMinArrowPosition()
-  }
-
-  private fun getDoubleArrowSize(): Int {
-    return builder.arrowSize * 2
-  }
-
-//  private fun initializeArrow(anchor: View) {
-//    with(binding.popupmenuArrow) {
-//      layoutParams = FrameLayout.LayoutParams(builder.arrowSize, builder.arrowSize)
-//      alpha = builder.alpha
-//      builder.arrowDrawable?.let { setImageDrawable(it) }
-//      setPadding(
-//        builder.arrowLeftPadding,
-//        builder.arrowTopPadding,
-//        builder.arrowRightPadding,
-//        builder.arrowBottomPadding
-//      )
-//      if (builder.arrowColor != NO_INT_VALUE) {
-//        ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(builder.arrowColor))
-//      } else {
-//        ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(builder.backgroundColor))
-//      }
-//      runOnAfterSDK21 {
-//        outlineProvider = ViewOutlineProvider.BOUNDS
-//      }
-//      binding.popupmenuCard.post {
-//        onPopupMenuInitializedListener?.onpopupmenuInitialized(getContentView())
-//
-//        adjustArrowOrientationByRules(anchor)
-//
-//        @SuppressLint("NewApi")
-//        when (builder.arrowOrientation) {
-//          ArrowOrientation.BOTTOMLEFT -> {
-//            rotation = 180f
-//            x = getArrowConstraintPositionX(anchor)
-//            y = binding.popupmenuCard.y + binding.popupmenuCard.height - SIZE_ARROW_BOUNDARY
-//            ViewCompat.setElevation(this, builder.arrowElevation)
-//            if (builder.arrowColorMatchpopupmenu) {
-//              foreground = BitmapDrawable(
-//                resources,
-//                adjustArrowColorByMatchingCardBackground(
-//                  this, x,
-//                  binding.popupmenuCard.height.toFloat()
-//                )
-//              )
-//            }
-//          }
-//          ArrowOrientation.TOPLEFT -> {
-//            rotation = 0f
-//            x = getArrowConstraintPositionX(anchor)
-//            y = binding.popupmenuCard.y - builder.arrowSize + SIZE_ARROW_BOUNDARY
-//            if (builder.arrowColorMatchpopupmenu) {
-//              foreground =
-//                BitmapDrawable(resources, adjustArrowColorByMatchingCardBackground(this, x, 0f))
-//            }
-//          }
-//          ArrowOrientation.BOTTOMRIGHT -> {
-//            rotation = -90f
-//            x = binding.popupmenuCard.x - builder.arrowSize + SIZE_ARROW_BOUNDARY
-//            y = getArrowConstraintPositionY(anchor)
-//            if (builder.arrowColorMatchpopupmenu) {
-//              foreground =
-//                BitmapDrawable(resources, adjustArrowColorByMatchingCardBackground(this, 0f, y))
-//            }
-//          }
-//          ArrowOrientation.TOPRIGHT -> {
-//            rotation = 0f
-//            x = getArrowConstraintPositionX(anchor)
-//            y = binding.popupmenuCard.y - builder.arrowSize + SIZE_ARROW_BOUNDARY
-//            if (builder.arrowColorMatchpopupmenu) {
-//              foreground = BitmapDrawable(
-//                resources,
-//                adjustArrowColorByMatchingCardBackground(
-//                  this, binding.popupmenuCard.width.toFloat(),
-//                  y
-//                )
-//              )
-//            }
-//          }
-//        }
-//        visible(builder.isVisibleArrow)
-//      }
-//    }
-//  }
-
-
-  private fun initializeArrow(anchor: View) {
-    with(binding.popupmenuArrow) {
-      layoutParams = FrameLayout.LayoutParams(builder.arrowSize, builder.arrowSize)
-      alpha = builder.alpha
-      builder.arrowDrawable?.let { setImageDrawable(it) }
-      setPadding(
-        builder.arrowLeftPadding,
-        builder.arrowTopPadding,
-        builder.arrowRightPadding,
-        builder.arrowBottomPadding
-      )
-      if (builder.arrowColor != NO_INT_VALUE) {
-        ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(builder.arrowColor))
-      } else {
-        ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(builder.backgroundColor))
-      }
-      runOnAfterSDK21 {
-        outlineProvider = ViewOutlineProvider.BOUNDS
-      }
-      binding.popupmenuCard.post {
-        onPopupMenuInitializedListener?.onpopupmenuInitialized(getContentView())
-
-        adjustArrowOrientationByRules(anchor)
-
-        @SuppressLint("NewApi")
-        when (builder.arrowOrientation) {
-          ArrowOrientation.BOTTOM -> {
-            rotation = 180f
-            x = getArrowConstraintPositionX(anchor)
-            y = binding.popupmenuCard.y + binding.popupmenuCard.height - SIZE_ARROW_BOUNDARY
-            ViewCompat.setElevation(this, builder.arrowElevation)
-            if (builder.arrowColorMatchpopupmenu) {
-              foreground = BitmapDrawable(
-                resources,
-                adjustArrowColorByMatchingCardBackground(
-                  this, x,
-                  binding.popupmenuCard.height.toFloat()
-                )
-              )
-            }
-          }
-          ArrowOrientation.TOP -> {
-            rotation = 0f
-            x = getArrowConstraintPositionX(anchor)
-            y = binding.popupmenuCard.y - builder.arrowSize + SIZE_ARROW_BOUNDARY
-            if (builder.arrowColorMatchpopupmenu) {
-              foreground =
-                BitmapDrawable(resources, adjustArrowColorByMatchingCardBackground(this, x, 0f))
-            }
-          }
-          ArrowOrientation.LEFT -> {
-            rotation = -90f
-            x = binding.popupmenuCard.x - builder.arrowSize + SIZE_ARROW_BOUNDARY
-            y = getArrowConstraintPositionY(anchor)
-            if (builder.arrowColorMatchpopupmenu) {
-              foreground =
-                BitmapDrawable(resources, adjustArrowColorByMatchingCardBackground(this, 0f, y))
-            }
-          }
-          ArrowOrientation.RIGHT -> {
-            rotation = 90f
-            x = binding.popupmenuCard.x + binding.popupmenuCard.width - SIZE_ARROW_BOUNDARY
-            y = getArrowConstraintPositionY(anchor)
-            if (builder.arrowColorMatchpopupmenu) {
-              foreground = BitmapDrawable(
-                resources,
-                adjustArrowColorByMatchingCardBackground(
-                  this, binding.popupmenuCard.width.toFloat(),
-                  y
-                )
-              )
-            }
-          }
+        if (builder.lifecycleOwner == null && context is LifecycleOwner) {
+            builder.setLifecycleOwner(context)
+            context.lifecycle.addObserver(this@PaytmOverflowMenu)
+        } else {
+            builder.lifecycleOwner?.lifecycle?.addObserver(this@PaytmOverflowMenu)
         }
-        visible(builder.isVisibleArrow)
-      }
     }
-  }
 
-  /**
-   * Calculate the color at arrow position from popupmenuCard. The color is then set as a foreground to the arrow.
-   *
-   * @param imageView the arrow imageview containing the drawable.
-   * @param x x position of the point where the middle of the arrow is connected to the popupmenu
-   * @param y y position of the point where the middle of the arrow is connected to the popupmenu
-   *
-   * @throws IllegalArgumentException Throws an exception when the arrow is attached outside the popupmenu.
-   *
-   */
-  private fun adjustArrowColorByMatchingCardBackground(
-    imageView: AppCompatImageView,
-    x: Float,
-    y: Float
-  ): Bitmap {
-    imageView.setColorFilter(builder.backgroundColor, PorterDuff.Mode.SRC_IN)
-    val oldBitmap = drawableToBitmap(
-      imageView.drawable, imageView.drawable.intrinsicWidth,
-      imageView.drawable.intrinsicHeight
-    )
-    val colors: Pair<Int, Int>
-    try {
-      colors = getColorsFrompopupmenuCard(x, y)
-    } catch (e: IllegalArgumentException) {
-      throw IllegalArgumentException(
-        "Arrow attached outside popupmenu. Could not get a matching color."
-      )
+    private fun adjustFitsSystemWindows(parent: ViewGroup) {
+        parent.fitsSystemWindows = false
+        (0 until parent.childCount).map { parent.getChildAt(it) }.forEach { child ->
+            child.fitsSystemWindows = false
+            if (child is ViewGroup) {
+                adjustFitsSystemWindows(child)
+            }
+        }
     }
-    val startColor = colors.first
-    val endColor = colors.second
 
-    val updatedBitmap =
-      Bitmap.createBitmap(oldBitmap.width, oldBitmap.height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(updatedBitmap)
-    canvas.drawBitmap(oldBitmap, 0f, 0f, null)
-    val paint = Paint()
-    val shader: LinearGradient = when (builder.arrowOrientation) {
-      ArrowOrientation.BOTTOM, ArrowOrientation.LEFT -> {
-        LinearGradient(
-          oldBitmap.width.toFloat() / 2 - builder.arrowHalfSize, 0f,
-          oldBitmap.width.toFloat(), 0f, startColor, endColor, Shader.TileMode.CLAMP
+    private fun getMinArrowPosition(): Float {
+        return (builder.arrowSize.toFloat() * builder.arrowAlignAnchorPaddingRatio) +
+                builder.arrowAlignAnchorPadding
+    }
+
+
+    private fun getMaxArrowPosition(): Float {
+        return getMeasuredWidth().toFloat() - builder.arrowSize - SIZE_ARROW_BOUNDARY - getMinArrowPosition()
+    }
+
+    private fun getDoubleArrowSize(): Int {
+        return builder.arrowSize * 2
+    }
+
+
+    private fun initializeArrow(anchor: View) {
+        with(binding.popupmenuArrow) {
+            layoutParams = FrameLayout.LayoutParams(builder.arrowSize, builder.arrowSize)
+            alpha = builder.alpha
+            builder.arrowDrawable?.let { setImageDrawable(it) }
+            setPadding(
+                builder.arrowLeftPadding,
+                builder.arrowTopPadding,
+                builder.arrowRightPadding,
+                builder.arrowBottomPadding
+            )
+            if (builder.arrowColor != NO_INT_VALUE) {
+                ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(builder.arrowColor))
+            } else {
+                ImageViewCompat.setImageTintList(
+                    this,
+                    ColorStateList.valueOf(builder.backgroundColor)
+                )
+            }
+            runOnAfterSDK21 {
+                outlineProvider = ViewOutlineProvider.BOUNDS
+            }
+            binding.popupmenuCard.post {
+                onPopupMenuInitializedListener?.onpopupmenuInitialized(getContentView())
+
+                adjustArrowOrientationByRules(anchor)
+
+                @SuppressLint("NewApi")
+                when (builder.arrowAlignment) {
+                    PopupMenuAlignment.BOTTOMLEFT, PopupMenuAlignment.BOTTOMRIGHT -> {
+                        rotation = 180f
+                        x = getArrowConstraintPositionX(anchor)
+                        y =
+                            binding.popupmenuCard.y + binding.popupmenuCard.height - SIZE_ARROW_BOUNDARY
+                        ViewCompat.setElevation(this, builder.arrowElevation)
+                        if (builder.arrowColorMatchpopupmenu) {
+                            foreground = BitmapDrawable(
+                                resources,
+                                adjustArrowColorByMatchingCardBackground(
+                                    this, x,
+                                    binding.popupmenuCard.height.toFloat()
+                                )
+                            )
+                        }
+                    }
+                    PopupMenuAlignment.TOPLEFT, PopupMenuAlignment.TOPRIGHT -> {
+                        rotation = 0f
+                        x = getArrowConstraintPositionX(anchor)
+                        y = binding.popupmenuCard.y - builder.arrowSize + SIZE_ARROW_BOUNDARY
+                        if (builder.arrowColorMatchpopupmenu) {
+                            foreground =
+                                BitmapDrawable(
+                                    resources,
+                                    adjustArrowColorByMatchingCardBackground(this, x, 0f)
+                                )
+                        }
+                    }
+                }
+                visible(builder.isVisibleArrow)
+            }
+        }
+    }
+
+    /**
+     * Calculate the color at arrow position from popupmenuCard. The color is then set as a foreground to the arrow.
+     *
+     * @param imageView the arrow imageview containing the drawable.
+     * @param x x position of the point where the middle of the arrow is connected to the popupmenu
+     * @param y y position of the point where the middle of the arrow is connected to the popupmenu
+     *
+     * @throws IllegalArgumentException Throws an exception when the arrow is attached outside the popupmenu.
+     *
+     */
+    private fun adjustArrowColorByMatchingCardBackground(
+        imageView: AppCompatImageView,
+        x: Float,
+        y: Float
+    ): Bitmap {
+        imageView.setColorFilter(builder.backgroundColor, PorterDuff.Mode.SRC_IN)
+        val oldBitmap = drawableToBitmap(
+            imageView.drawable, imageView.drawable.intrinsicWidth,
+            imageView.drawable.intrinsicHeight
         )
-      }
-      ArrowOrientation.RIGHT, ArrowOrientation.TOP -> {
-        LinearGradient(
-          oldBitmap.width.toFloat() / 2 + builder.arrowHalfSize, 0f, 0f, 0f,
-          startColor, endColor, Shader.TileMode.CLAMP
-        )
-      }
-    }
-    paint.shader = shader
-    paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-    canvas.drawRect(0f, 0f, oldBitmap.width.toFloat(), oldBitmap.height.toFloat(), paint)
-    imageView.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.SRC_IN)
-    return updatedBitmap
-  }
+        val colors: Pair<Int, Int>
+        try {
+            colors = getColorsFrompopupmenuCard(x, y)
+        } catch (e: IllegalArgumentException) {
+            throw IllegalArgumentException(
+                "Arrow attached outside popupmenu. Could not get a matching color."
+            )
+        }
+        val startColor = colors.first
+        val endColor = colors.second
 
-  private fun getColorsFrompopupmenuCard(x: Float, y: Float): Pair<Int, Int> {
-    val bitmap = drawableToBitmap(
-      binding.popupmenuCard.background, binding.popupmenuCard.width + 1,
-      binding.popupmenuCard.height + 1
-    )
-    val startColor: Int
-    val endColor: Int
-    when (builder.arrowOrientation) {
-      ArrowOrientation.BOTTOM, ArrowOrientation.TOP -> {
-        startColor = bitmap.getPixel((x + builder.arrowHalfSize).toInt(), y.toInt())
-        endColor = bitmap.getPixel((x - builder.arrowHalfSize).toInt(), y.toInt())
-      }
-      ArrowOrientation.LEFT, ArrowOrientation.RIGHT -> {
-        startColor = bitmap.getPixel(x.toInt(), (y + builder.arrowHalfSize).toInt())
-        endColor = bitmap.getPixel(x.toInt(), (y - builder.arrowHalfSize).toInt())
-      }
+        val updatedBitmap =
+            Bitmap.createBitmap(oldBitmap.width, oldBitmap.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(updatedBitmap)
+        canvas.drawBitmap(oldBitmap, 0f, 0f, null)
+        val paint = Paint()
+        val shader: LinearGradient = when (builder.arrowAlignment) {
+            PopupMenuAlignment.BOTTOMLEFT, PopupMenuAlignment.TOPLEFT -> {
+                LinearGradient(
+                    oldBitmap.width.toFloat() / 2 - builder.arrowHalfSize, 0f,
+                    oldBitmap.width.toFloat(), 0f, startColor, endColor, Shader.TileMode.CLAMP
+                )
+            }
+            PopupMenuAlignment.BOTTOMRIGHT, PopupMenuAlignment.TOPRIGHT -> {
+                LinearGradient(
+                    oldBitmap.width.toFloat() / 2 + builder.arrowHalfSize, 0f, 0f, 0f,
+                    startColor, endColor, Shader.TileMode.CLAMP
+                )
+            }
+        }
+        paint.shader = shader
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawRect(0f, 0f, oldBitmap.width.toFloat(), oldBitmap.height.toFloat(), paint)
+        imageView.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.SRC_IN)
+        return updatedBitmap
     }
+
+    private fun getColorsFrompopupmenuCard(x: Float, y: Float): Pair<Int, Int> {
+        val bitmap = drawableToBitmap(
+            binding.popupmenuCard.background, binding.popupmenuCard.width + 1,
+            binding.popupmenuCard.height + 1
+        )
+
+        val startColor: Int = bitmap.getPixel((x + builder.arrowHalfSize).toInt(), y.toInt())
+        val endColor: Int = bitmap.getPixel((x - builder.arrowHalfSize).toInt(), y.toInt())
+
     return Pair(startColor, endColor)
-  }
+}
 
-  private fun drawableToBitmap(drawable: Drawable, width: Int, height: Int): Bitmap {
+private fun drawableToBitmap(drawable: Drawable, width: Int, height: Int): Bitmap {
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     drawable.setBounds(0, 0, canvas.width, canvas.height)
     drawable.draw(canvas)
     return bitmap
-  }
+}
 
-  /**
-   * Adjust the orientation of the arrow depending on the [ArrowOrientationRules].
-   *
-   * @param anchor A target anchor to be shown under the popupmenu.
-   */
-  private fun adjustArrowOrientationByRules(anchor: View) {
+/**
+ * Adjust the orientation of the arrow depending on the [ArrowOrientationRules].
+ *
+ * @param anchor A target anchor to be shown under the popupmenu.
+ */
+private fun adjustArrowOrientationByRules(anchor: View) {
     if (builder.arrowOrientationRules == ArrowOrientationRules.ALIGN_FIXED) return
 
     val anchorRect = Rect()
@@ -402,33 +289,39 @@ class PaytmOverflowMenu(
     val location: IntArray = intArrayOf(0, 0)
     bodyWindow.contentView.getLocationOnScreen(location)
 
-    if (builder.arrowOrientation == ArrowOrientation.TOP &&
-      location[1] < anchorRect.bottom
+    if (builder.arrowAlignment == (PopupMenuAlignment.TOPLEFT) &&
+        location[1] < anchorRect.bottom
     ) {
-      builder.setArrowOrientation(ArrowOrientation.BOTTOM)
-    } else if (builder.arrowOrientation == ArrowOrientation.BOTTOM &&
-      location[1] > anchorRect.top
+        builder.setArrowOrientation(PopupMenuAlignment.BOTTOMLEFT)
+    } else if (builder.arrowAlignment == PopupMenuAlignment.TOPRIGHT &&
+                location[1] < anchorRect.bottom){
+            builder.setArrowOrientation(PopupMenuAlignment.BOTTOMRIGHT)
+        } else if (builder.arrowAlignment == PopupMenuAlignment.BOTTOMRIGHT &&
+        location[1] > anchorRect.top
     ) {
-      builder.setArrowOrientation(ArrowOrientation.TOP)
+        builder.setArrowOrientation(PopupMenuAlignment.TOPRIGHT)
+    } else if (builder.arrowAlignment == PopupMenuAlignment.BOTTOMLEFT &&
+        location[1] > anchorRect.top
+    ) {
+        builder.setArrowOrientation(PopupMenuAlignment.TOPLEFT)
     }
 
     initializepopupmenuContent()
-  }
+}
 
-  private fun getArrowConstraintPositionX(anchor: View): Float {
+private fun getArrowConstraintPositionX(anchor: View): Float {
     val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
     val anchorX: Int = anchor.getViewPointOnScreen().x
     val minPosition = getMinArrowPosition()
     val maxPosition1 = binding.popupmenuCard.measuredWidth - minPosition
-    val maxPosition = getMeasuredWidth().toFloat() - builder.arrowSize - SIZE_ARROW_BOUNDARY - minPosition
+    val maxPosition =
+        getMeasuredWidth().toFloat() - builder.arrowSize - SIZE_ARROW_BOUNDARY - minPosition
 
-    return when(builder.arrowOrientation){
-      ArrowOrientation.TOP -> maxPosition
-      ArrowOrientation.RIGHT -> maxPosition
-      ArrowOrientation.BOTTOM -> maxPosition
-      else ->{
-        maxPosition
-      }
+    return when (builder.arrowAlignment) {
+        PopupMenuAlignment.TOPLEFT -> minPosition
+        PopupMenuAlignment.TOPRIGHT -> maxPosition
+        PopupMenuAlignment.BOTTOMLEFT -> minPosition
+        PopupMenuAlignment.BOTTOMRIGHT -> maxPosition
     }
 //    return when (builder.arrowPositionRules) {
 //      ArrowPositionRules.ALIGN_POPUPMENU -> binding.popupmenuWrapper.width * builder.arrowPosition - builder.arrowHalfSize
@@ -448,7 +341,7 @@ class PaytmOverflowMenu(
 //        }
 //      }
 //    }
-  }
+}
 
 //  private fun getArrowConstraintPositionY(anchor: View): Float {
 //    val statusBarHeight = anchor.getStatusBarHeight(builder.isStatusBarVisible)
@@ -479,7 +372,7 @@ class PaytmOverflowMenu(
 //  }
 
 
-  private fun getArrowConstraintPositionY(anchor: View): Float {
+private fun getArrowConstraintPositionY(anchor: View): Float {
     val statusBarHeight = anchor.getStatusBarHeight(builder.isStatusBarVisible)
     val balloonY: Int = binding.popupmenuContent.getViewPointOnScreen().y - statusBarHeight
     val anchorY: Int = anchor.getViewPointOnScreen().y - statusBarHeight
@@ -487,269 +380,257 @@ class PaytmOverflowMenu(
     val maxPosition = getMeasuredHeight() - minPosition - builder.marginTop - builder.marginBottom
     val arrowHalfSize = builder.arrowSize / 2
     return when (builder.arrowPositionRules) {
-      ArrowPositionRules.ALIGN_POPUPMENU -> binding.popupmenuWrapper.height * builder.arrowPosition - arrowHalfSize
-      ArrowPositionRules.ALIGN_ANCHOR -> {
-        when {
-          anchorY + anchor.height < balloonY -> minPosition
-          balloonY + getMeasuredHeight() < anchorY -> maxPosition
-          else -> {
-            val position =
-              (anchor.height) * builder.arrowPosition + anchorY - balloonY - arrowHalfSize
+        ArrowPositionRules.ALIGN_POPUPMENU -> binding.popupmenuWrapper.height * builder.arrowPosition - arrowHalfSize
+        ArrowPositionRules.ALIGN_ANCHOR -> {
             when {
-              position <= getDoubleArrowSize() -> minPosition
-              position > getMeasuredHeight() - getDoubleArrowSize() -> maxPosition
-              else -> position
+                anchorY + anchor.height < balloonY -> minPosition
+                balloonY + getMeasuredHeight() < anchorY -> maxPosition
+                else -> {
+                    val position =
+                        (anchor.height) * builder.arrowPosition + anchorY - balloonY - arrowHalfSize
+                    when {
+                        position <= getDoubleArrowSize() -> minPosition
+                        position > getMeasuredHeight() - getDoubleArrowSize() -> maxPosition
+                        else -> position
+                    }
+                }
             }
-          }
         }
-      }
     }
-  }
+}
 
-  private fun initializeBackground() {
+private fun initializeBackground() {
     with(binding.popupmenuCard) {
-      alpha = builder.alpha
-      radius = builder.cornerRadius
-      ViewCompat.setElevation(this, builder.elevation)
-      background = builder.backgroundDrawable ?: GradientDrawable().apply {
-        setColor(builder.backgroundColor)
-        cornerRadius = builder.cornerRadius
-      }
-      setPadding(
-        builder.paddingLeft,
-        builder.paddingTop,
-        builder.paddingRight,
-        builder.paddingBottom
-      )
+        alpha = builder.alpha
+        radius = builder.cornerRadius
+        ViewCompat.setElevation(this, builder.elevation)
+        background = builder.backgroundDrawable ?: GradientDrawable().apply {
+            setColor(builder.backgroundColor)
+            cornerRadius = builder.cornerRadius
+        }
+        setPadding(
+            builder.paddingLeft,
+            builder.paddingTop,
+            builder.paddingRight,
+            builder.paddingBottom
+        )
     }
-  }
+}
 
-  private fun initializepopupmenuWindow() {
+private fun initializepopupmenuWindow() {
     with(this.bodyWindow) {
-      isOutsideTouchable = true
-      isFocusable = builder.isFocusable
-      setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-      runOnAfterSDK21 {
-        elevation = builder.elevation
-      }
-      setIsAttachedInDecor(builder.isAttachedInDecor)
+        isOutsideTouchable = true
+        isFocusable = builder.isFocusable
+        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        runOnAfterSDK21 {
+            elevation = builder.elevation
+        }
+        setIsAttachedInDecor(builder.isAttachedInDecor)
     }
-  }
+}
 
-  private fun initializepopupmenuListeners() {
+private fun initializepopupmenuListeners() {
     setOnPopupMenuClickListener(builder.onPopupMenuClickListener)
     setOnPopupMenuDismissListener(builder.onPopupMenuDismissListener)
     setOnPopupMenuOutsideTouchListener(builder.onPopupMenuOutsideTouchListener)
-  }
+}
 
-  private fun initializepopupmenuRoot() {
+private fun initializepopupmenuRoot() {
     with(binding.popupmenuWrapper) {
-      (layoutParams as ViewGroup.MarginLayoutParams).setMargins(
-        builder.marginLeft,
-        builder.marginTop,
-        builder.marginRight,
-        builder.marginBottom
-      )
+        (layoutParams as ViewGroup.MarginLayoutParams).setMargins(
+            builder.marginLeft,
+            builder.marginTop,
+            builder.marginRight,
+            builder.marginBottom
+        )
     }
-  }
+}
 
-  private fun initializepopupmenuContent() {
+private fun initializepopupmenuContent() {
     val paddingSize = builder.arrowSize - SIZE_ARROW_BOUNDARY
     val elevation = builder.elevation.toInt()
     with(binding.popupmenuContent) {
-      when (builder.arrowOrientation) {
-        ArrowOrientation.LEFT -> setPadding(paddingSize, elevation, paddingSize, elevation)
-        ArrowOrientation.RIGHT -> setPadding(paddingSize, elevation, paddingSize, elevation)
-        ArrowOrientation.TOP ->
-          setPadding(elevation, paddingSize, elevation, paddingSize.coerceAtLeast(elevation))
-        ArrowOrientation.BOTTOM ->
-          setPadding(elevation, paddingSize, elevation, paddingSize.coerceAtLeast(elevation))
+        when (builder.arrowAlignment) {
+//        ArrowOrientation.LEFT -> setPadding(paddingSize, elevation, paddingSize, elevation)
+//        ArrowOrientation.RIGHT -> setPadding(paddingSize, elevation, paddingSize, elevation)
+            PopupMenuAlignment.TOPRIGHT, PopupMenuAlignment.TOPLEFT ->
+                setPadding(elevation, paddingSize, elevation, paddingSize.coerceAtLeast(elevation))
+            PopupMenuAlignment.BOTTOMRIGHT, PopupMenuAlignment.BOTTOMLEFT ->
+                setPadding(elevation, paddingSize, elevation, paddingSize.coerceAtLeast(elevation))
 
-      }
+        }
     }
-  }
+}
 
 
-  private fun initializepopupmenuLayout() {
+private fun initializepopupmenuLayout() {
     if (hasCustomLayout()) {
-      initializeCustomLayout()
+        initializeCustomLayout()
     }
-  }
+}
 
-  /** Check the [PaytmOverflowMenu.Builder] has a custom layout [PaytmOverflowMenu.Builder.layoutRes] or [PaytmOverflowMenu.Builder.layout]. */
-  private fun hasCustomLayout(): Boolean {
+/** Check the [PaytmOverflowMenu.Builder] has a custom layout [PaytmOverflowMenu.Builder.layoutRes] or [PaytmOverflowMenu.Builder.layout]. */
+private fun hasCustomLayout(): Boolean {
     return builder.layoutRes != null || builder.layout != null
-  }
+}
 
-  /** Initializes the popupmenu content using the custom layout. */
-  private fun initializeCustomLayout() {
+/** Initializes the popupmenu content using the custom layout. */
+private fun initializeCustomLayout() {
     val layout = builder.layoutRes?.let {
-      LayoutInflater.from(context).inflate(it, binding.popupmenuCard, false)
+        LayoutInflater.from(context).inflate(it, binding.popupmenuCard, false)
     } ?: builder.layout ?: throw IllegalArgumentException("The custom layout is null.")
     binding.popupmenuCard.removeAllViews()
     binding.popupmenuCard.addView(layout)
     traverseAndMeasureTextWidth(binding.popupmenuCard)
-  }
+}
 
 
-
-  /**
-   * Shows [PaytmOverflowMenu] tooltips on the [anchor] with some initializations related to arrow, content, and overlay.
-   * The popupmenu will be shown with the [overlayWindow] if the anchorView's parent window is in a valid state.
-   * The size of the content will be measured internally, and it will affect calculating the popup size.
-   *
-   * @param block A lambda block for showing the [bodyWindow].
-   */
-  @MainThread
-  private inline fun show(anchor: View, crossinline block: () -> Unit) {
+/**
+ * Shows [PaytmOverflowMenu] tooltips on the [anchor] with some initializations related to arrow, content, and overlay.
+ * The popupmenu will be shown with the [overlayWindow] if the anchorView's parent window is in a valid state.
+ * The size of the content will be measured internally, and it will affect calculating the popup size.
+ *
+ * @param block A lambda block for showing the [bodyWindow].
+ */
+@MainThread
+private inline fun show(anchor: View, crossinline block: () -> Unit) {
     if (!isShowing &&
-      // If the popupmenu is already destroyed depending on the lifecycle,
-      // We should not allow showing the popupWindow, it's related to `relay()` method. (#46)
-      !destroyed &&
-      // We should check the current Activity is running.
-      // If the Activity is finishing, we can't attach the popupWindow to the Activity's window. (#92)
-      !context.isFinishing &&
-      // We should check the contentView is already attached to the decorView or backgroundView in the popupWindow.
-      // Sometimes there is a concurrency issue between show and dismiss the popupWindow. (#149)
-      bodyWindow.contentView.parent == null &&
-      // we should check the anchor view is attached to the parent's window.
-      ViewCompat.isAttachedToWindow(anchor)
+        // If the popupmenu is already destroyed depending on the lifecycle,
+        // We should not allow showing the popupWindow, it's related to `relay()` method. (#46)
+        !destroyed &&
+        // We should check the current Activity is running.
+        // If the Activity is finishing, we can't attach the popupWindow to the Activity's window. (#92)
+        !context.isFinishing &&
+        // We should check the contentView is already attached to the decorView or backgroundView in the popupWindow.
+        // Sometimes there is a concurrency issue between show and dismiss the popupWindow. (#149)
+        bodyWindow.contentView.parent == null &&
+        // we should check the anchor view is attached to the parent's window.
+        ViewCompat.isAttachedToWindow(anchor)
     ) {
-      anchor.post {
-        this.isShowing = true
+        anchor.post {
+            this.isShowing = true
 
-        val dismissDelay = this.builder.autoDismissDuration
-        if (dismissDelay != NO_LONG_VALUE) {
-          dismissWithDelay(dismissDelay)
+            val dismissDelay = this.builder.autoDismissDuration
+            if (dismissDelay != NO_LONG_VALUE) {
+                dismissWithDelay(dismissDelay)
+            }
+
+            if (hasCustomLayout()) {
+                traverseAndMeasureTextWidth(binding.popupmenuCard)
+            }
+            this.binding.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            this.bodyWindow.width = getMeasuredWidth()
+            this.bodyWindow.height = getMeasuredHeight()
+
+            initializeArrow(anchor)
+            initializepopupmenuContent()
+
+            block()
         }
-
-        if (hasCustomLayout()) {
-          traverseAndMeasureTextWidth(binding.popupmenuCard)
-        }
-        this.binding.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        this.bodyWindow.width = getMeasuredWidth()
-        this.bodyWindow.height = getMeasuredHeight()
-
-        initializeArrow(anchor)
-        initializepopupmenuContent()
-
-        block()
-      }
     } else if (builder.dismissWhenShowAgain) {
-      dismiss()
+        dismiss()
     }
-  }
-  
+}
 
-  /**
-   * Shows the popupmenu over the anchor view (overlap) as the center aligns.
-   * Even if you use with the [ArrowOrientationRules.ALIGN_ANCHOR], the alignment will not be guaranteed.
-   * So if you use the function, use with [ArrowOrientationRules.ALIGN_FIXED] and fixed [ArrowOrientation].
-   *
-   * @param anchor A target view which popup will be shown with overlap.
-   * @param xOff A horizontal offset from the anchor in pixels.
-   * @param yOff A vertical offset from the anchor in pixels.
-   * @param centerAlign A rule for deciding the alignment of the popupmenu.
-   */
 
-  @JvmOverloads
-  fun showAtCenter(
+/**
+ * Shows the popupmenu over the anchor view (overlap) as the center aligns.
+ * Even if you use with the [ArrowOrientationRules.ALIGN_ANCHOR], the alignment will not be guaranteed.
+ * So if you use the function, use with [ArrowOrientationRules.ALIGN_FIXED] and fixed [ArrowOrientation].
+ *
+ * @param anchor A target view which popup will be shown with overlap.
+ * @param xOff A horizontal offset from the anchor in pixels.
+ * @param yOff A vertical offset from the anchor in pixels.
+ * @param alignment A rule for deciding the alignment of the popupmenu.
+ */
+
+@JvmOverloads
+fun show(
     anchor: View,
     xOff: Int = 0,
     yOff: Int = 0,
-    centerAlign: PopupMenuCenterAlign = PopupMenuCenterAlign.TOP
-  ) {
-    val halfAnchorWidth = (anchor.measuredWidth * 0.5f).roundToInt()
-    val halfAnchorHeight = (anchor.measuredHeight * 0.5f).roundToInt()
-    val halfBalloonWidth = (getMeasuredWidth() * 0.5f).roundToInt()
-    val halfBalloonHeight = (getMeasuredHeight() * 0.5f).roundToInt()
+    alignment: PopupMenuAlignment = PopupMenuAlignment.BOTTOMLEFT
+) {
     show(anchor) {
-      when (centerAlign) {
-        PopupMenuCenterAlign.TOP ->{
-          val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
-          val anchorX: Int = anchor.getViewPointOnScreen().x
-          bodyWindow.showAsDropDown(
-            anchor,
-            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.arrowHalfSize).toInt()),
-            -getMeasuredHeight() - anchor.measuredHeight + yOff,
-            Gravity.START or Gravity.LEFT
-          )
-        }
+        when (alignment) {
+            PopupMenuAlignment.BOTTOMLEFT -> {
+                val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
+                val anchorX: Int = anchor.getViewPointOnScreen().x
+                bodyWindow.showAsDropDown(
+                    anchor,
+                    ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.arrowHalfSize).toInt()) + xOff,
+                    -getMeasuredHeight() - anchor.measuredHeight + yOff,
+                    Gravity.START or Gravity.LEFT
+                )
+            }
 
-        PopupMenuCenterAlign.BOTTOM ->{
-          val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
-          val anchorX: Int = anchor.getViewPointOnScreen().x
-          bodyWindow.showAsDropDown(
-            anchor,
-            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.arrowHalfSize).toInt()),
-            0,
-            Gravity.START or Gravity.LEFT
-          )
-        }
+            PopupMenuAlignment.TOPLEFT -> {
+                val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
+                val anchorX: Int = anchor.getViewPointOnScreen().x
+                bodyWindow.showAsDropDown(
+                    anchor,
+                    ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.arrowHalfSize).toInt()) + xOff,
+                    yOff,
+                    Gravity.START or Gravity.LEFT
+                )
+            }
 
-        PopupMenuCenterAlign.START ->{
-          val anchorX: Int = anchor.getViewPointOnScreen().x
-          //Get the height of 2/3rd of the height of the screen
+            PopupMenuAlignment.BOTTOMRIGHT -> {
+                val anchorX: Int = anchor.getViewPointOnScreen().x
+                //Get the height of 2/3rd of the height of the screen
 
-          //Get the height of 2/3rd of the height of the screen
-          val displayMetrics = context.resources.displayMetrics
-          val height = displayMetrics.heightPixels
-          val width = displayMetrics.widthPixels
-          println("Height:$height")
-          println("Width:$width")
+                //Get the height of 2/3rd of the height of the screen
+                val displayMetrics = context.resources.displayMetrics
+                val height = displayMetrics.heightPixels
+                val width = displayMetrics.widthPixels
+                println("Height:$height")
+                println("Width:$width")
 
 //          bodyWindow.showAsDropDown(anchor,
 //            (-(anchor.right - ((anchorX + anchor.right) / 2)) + getMinArrowPosition().toInt() + builder.arrowSize - SIZE_ARROW_BOUNDARY - builder.arrowHalfSize).toInt(),
 //            (-getMeasuredHeight() + halfAnchorHeight) + yOff,
 //            Gravity.RIGHT or Gravity.END)
-          bodyWindow.showAsDropDown(anchor,
-            (-(anchor.right - ((anchorX + anchor.right) / 2)) + (getMinArrowPosition() + builder.arrowSize - SIZE_ARROW_BOUNDARY) - builder.arrowHalfSize).toInt(),
-            -getMeasuredHeight() - anchor.measuredHeight + yOff,
-          Gravity.RIGHT or Gravity.END)
+                bodyWindow.showAsDropDown(
+                    anchor,
+                    (-(anchor.right - ((anchorX + anchor.right) / 2)) + (getMinArrowPosition() + builder.arrowSize - SIZE_ARROW_BOUNDARY) - builder.arrowHalfSize).toInt() + xOff,
+                    -getMeasuredHeight() - anchor.measuredHeight + yOff,
+                    Gravity.RIGHT or Gravity.END
+                )
+
+            }
+
+            PopupMenuAlignment.TOPRIGHT -> {
+                val anchorX: Int = anchor.getViewPointOnScreen().x
+                val displayMetrics = context.resources.displayMetrics
+                val height = displayMetrics.heightPixels
+                val width = displayMetrics.widthPixels
+                println("Height:$height")
+                println("Width:$width")
+
+                bodyWindow.showAsDropDown(
+                    anchor,
+                    (-(anchor.right - ((anchorX + anchor.right) / 2)) + getMinArrowPosition().toInt() + builder.arrowSize - SIZE_ARROW_BOUNDARY - builder.arrowHalfSize).toInt() + xOff,
+                    yOff, Gravity.RIGHT or Gravity.END
+                )
+
+            }
 
         }
-
-        PopupMenuCenterAlign.END ->{
-          val anchorX: Int = anchor.getViewPointOnScreen().x
-          //Get the height of 2/3rd of the height of the screen
-
-          //Get the height of 2/3rd of the height of the screen
-          val displayMetrics = context.resources.displayMetrics
-          val height = displayMetrics.heightPixels
-          val width = displayMetrics.widthPixels
-          println("Height:$height")
-          println("Width:$width")
-
-//          if ((width - anchorX) < getMeasuredWidth()) {
-            bodyWindow.showAsDropDown(anchor,
-              (-(anchor.right - ((anchorX + anchor.right) / 2)) + getMinArrowPosition().toInt() + builder.arrowSize - SIZE_ARROW_BOUNDARY - builder.arrowHalfSize).toInt(), 0, Gravity.RIGHT or Gravity.END)
-//          } else {
-//            bodyWindow.showAsDropDown(
-//              anchor,
-//              0,
-//              0,
-//              Gravity.RIGHT or Gravity.END
-           // )
-         // }
-
-        }
-
-      }
     }
-  }
+}
 
 
-  /**
-   * Shows the popupmenu on an anchor view as drop down with x-off and y-off.
-   *
-   * @param anchor A target view which popup will be shown to.
-   * @param xOff A horizontal offset from the anchor in pixels.
-   * @param yOff A vertical offset from the anchor in pixels.
-   */
-  
-  fun showAsDropDown(anchor: View, xOff: Int = 0, yOff: Int = 0) {
+/**
+ * Shows the popupmenu on an anchor view as drop down with x-off and y-off.
+ *
+ * @param anchor A target view which popup will be shown to.
+ * @param xOff A horizontal offset from the anchor in pixels.
+ * @param yOff A vertical offset from the anchor in pixels.
+ */
+
+fun showAsDropDown(anchor: View, xOff: Int = 0, yOff: Int = 0) {
     show(anchor) { bodyWindow.showAsDropDown(anchor, xOff, yOff) }
-  }
+}
 
 
 //  /**
@@ -771,42 +652,48 @@ class PaytmOverflowMenu(
 //  }
 
 
-  /**
-   * Shows the balloon on an anchor view as the top alignment with x-off and y-off.
-   *
-   * @param anchor A target view which popup will be shown to.
-   * @param xOff A horizontal offset from the anchor in pixels.
-   * @param yOff A vertical offset from the anchor in pixels.
-   */
-  @JvmOverloads
-  fun showAlignTop(anchor: View, xOff: Int = 0, yOff: Int = 0) {
+/**
+ * Shows the balloon on an anchor view as the top alignment with x-off and y-off.
+ *
+ * @param anchor A target view which popup will be shown to.
+ * @param xOff A horizontal offset from the anchor in pixels.
+ * @param yOff A vertical offset from the anchor in pixels.
+ */
+@JvmOverloads
+fun showAlignTop(anchor: View, xOff: Int = 0, yOff: Int = 0) {
     show(anchor) {
-      bodyWindow.showAsDropDown(
-        anchor,
-        builder.supportRtlLayoutFactor * ((anchor.measuredWidth / 2) - (getMeasuredWidth() / 2) + xOff),
-        -getMeasuredHeight() - anchor.measuredHeight + yOff
-      )
+        val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
+        val anchorX: Int = anchor.getViewPointOnScreen().x
+        bodyWindow.showAsDropDown(
+            anchor,
+            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.arrowHalfSize).toInt()),
+            -getMeasuredHeight() - anchor.measuredHeight + yOff,
+            Gravity.START or Gravity.LEFT
+        )
     }
-  }
+}
 
 
-  /**
-   * Shows the balloon on an anchor view as the bottom alignment with x-off and y-off.
-   *
-   * @param anchor A target view which popup will be shown to.
-   * @param xOff A horizontal offset from the anchor in pixels.
-   * @param yOff A vertical offset from the anchor in pixels.
-   */
-  @JvmOverloads
-  fun showAlignBottom(anchor: View, xOff: Int = 0, yOff: Int = 0) {
+/**
+ * Shows the balloon on an anchor view as the bottom alignment with x-off and y-off.
+ *
+ * @param anchor A target view which popup will be shown to.
+ * @param xOff A horizontal offset from the anchor in pixels.
+ * @param yOff A vertical offset from the anchor in pixels.
+ */
+@JvmOverloads
+fun showAlignBottom(anchor: View, xOff: Int = 0, yOff: Int = 0) {
     show(anchor) {
-      bodyWindow.showAsDropDown(
-        anchor,
-        builder.supportRtlLayoutFactor * ((anchor.measuredWidth / 2) - (getMeasuredWidth() / 2) + xOff),
-        yOff
-      )
+        val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
+        val anchorX: Int = anchor.getViewPointOnScreen().x
+        bodyWindow.showAsDropDown(
+            anchor,
+            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.arrowHalfSize).toInt()),
+            0,
+            Gravity.START or Gravity.LEFT
+        )
     }
-  }
+}
 
 
 //  /**
@@ -842,61 +729,61 @@ class PaytmOverflowMenu(
 //  }
 
 
-  /**
-   * Shows the popupmenu on an anchor view as the right alignment with x-off and y-off.
-   *
-   * @param anchor A target view which popup will be shown to.
-   * @param xOff A horizontal offset from the anchor in pixels.
-   * @param yOff A vertical offset from the anchor in pixels.
-   */
-  
-  fun showAlignRight(anchor: View, xOff: Int = 0, yOff: Int = 0) {
+/**
+ * Shows the popupmenu on an anchor view as the right alignment with x-off and y-off.
+ *
+ * @param anchor A target view which popup will be shown to.
+ * @param xOff A horizontal offset from the anchor in pixels.
+ * @param yOff A vertical offset from the anchor in pixels.
+ */
+
+fun showAlignRight(anchor: View, xOff: Int = 0, yOff: Int = 0) {
     show(anchor) {
-      bodyWindow.showAsDropDown(
-        anchor,
-        anchor.measuredWidth + xOff,
-        -(getMeasuredHeight() / 2) - (anchor.measuredHeight / 2) + yOff
-      )
+        bodyWindow.showAsDropDown(
+            anchor,
+            anchor.measuredWidth + xOff,
+            -(getMeasuredHeight() / 2) - (anchor.measuredHeight / 2) + yOff
+        )
     }
-  }
+}
 
 
-  /**
-   * Shows the popupmenu on an anchor view as the left alignment with x-off and y-off.
-   *
-   * @param anchor A target view which popup will be shown to.
-   * @param xOff A horizontal offset from the anchor in pixels.
-   * @param yOff A vertical offset from the anchor in pixels.
-   */
-  
-  fun showAlignLeft(anchor: View, xOff: Int = 0, yOff: Int = 0) {
+/**
+ * Shows the popupmenu on an anchor view as the left alignment with x-off and y-off.
+ *
+ * @param anchor A target view which popup will be shown to.
+ * @param xOff A horizontal offset from the anchor in pixels.
+ * @param yOff A vertical offset from the anchor in pixels.
+ */
+
+fun showAlignLeft(anchor: View, xOff: Int = 0, yOff: Int = 0) {
     show(anchor) {
-      bodyWindow.showAsDropDown(
-        anchor,
-        -(getMeasuredWidth()) + xOff,
-        -(getMeasuredHeight() / 2) - (anchor.measuredHeight / 2) + yOff
-      )
+        bodyWindow.showAsDropDown(
+            anchor,
+            -(getMeasuredWidth()) + xOff,
+            -(getMeasuredHeight() / 2) - (anchor.measuredHeight / 2) + yOff
+        )
     }
-  }
+}
 
 
-  /** updates popup and arrow position of the popup based on a new target anchor view. */
-  @MainThread
-  private inline fun update(anchor: View, crossinline block: () -> Unit) {
+/** updates popup and arrow position of the popup based on a new target anchor view. */
+@MainThread
+private inline fun update(anchor: View, crossinline block: () -> Unit) {
     if (isShowing) {
-      initializeArrow(anchor)
-      block()
+        initializeArrow(anchor)
+        block()
     }
-  }
+}
 
-  /** dismiss the popup menu. */
-  fun dismiss() {
+/** dismiss the popup menu. */
+fun dismiss() {
     if (this.isShowing) {
-      val dismissWindow: () -> Unit = {
-        this.isShowing = false
-        this.bodyWindow.dismiss()
-        this.handler.removeCallbacks(autoDismissRunnable)
-      }
+        val dismissWindow: () -> Unit = {
+            this.isShowing = false
+            this.bodyWindow.dismiss()
+            this.handler.removeCallbacks(autoDismissRunnable)
+        }
 //      if (this.builder.popupmenuAnimation == popupmenuAnimation.CIRCULAR) {
 //        this.bodyWindow.contentView.circularUnRevealed(builder.circularDuration) {
 //          dismissWindow()
@@ -904,217 +791,216 @@ class PaytmOverflowMenu(
 //      } else {
 //
 //      }
-      dismissWindow()
+        dismissWindow()
     }
-  }
+}
 
-  /** dismiss the popup menu with milliseconds delay. */
-  fun dismissWithDelay(delay: Long) =
+/** dismiss the popup menu with milliseconds delay. */
+fun dismissWithDelay(delay: Long) =
     handler.postDelayed(autoDismissRunnable, delay)
 
-  /** sets a [OnPopupMenuClickListener] to the popup. */
-  fun setOnPopupMenuClickListener(onPopupMenuClickListener: OnPopupMenuClickListener?) {
+/** sets a [OnPopupMenuClickListener] to the popup. */
+fun setOnPopupMenuClickListener(onPopupMenuClickListener: OnPopupMenuClickListener?) {
     this.binding.popupmenuWrapper.setOnClickListener {
-      onPopupMenuClickListener?.onpopupmenuClick(it)
-      if (builder.dismissWhenClicked) dismiss()
+        onPopupMenuClickListener?.onpopupmenuClick(it)
+        if (builder.dismissWhenClicked) dismiss()
     }
-  }
+}
 
 
-  /** sets a [OnPopupMenuClickListener] to the popup using lambda. */
-  fun setOnPopupMenuClickListener(block: (View) -> Unit) {
+/** sets a [OnPopupMenuClickListener] to the popup using lambda. */
+fun setOnPopupMenuClickListener(block: (View) -> Unit) {
     setOnPopupMenuClickListener(OnPopupMenuClickListener(block))
-  }
+}
 
-  /**
-   * sets a [OnPopupMenuInitializedListener] to the popup.
-   * The [OnPopupMenuInitializedListener.onpopupmenuInitialized] will be invoked when inflating the
-   * body content of the popupmenu is finished.
-   */
-  fun setOnpopupmenuInitializedListener(onPopupMenuInitializedListener: OnPopupMenuInitializedListener?) {
+/**
+ * sets a [OnPopupMenuInitializedListener] to the popup.
+ * The [OnPopupMenuInitializedListener.onpopupmenuInitialized] will be invoked when inflating the
+ * body content of the popupmenu is finished.
+ */
+fun setOnpopupmenuInitializedListener(onPopupMenuInitializedListener: OnPopupMenuInitializedListener?) {
     this.onPopupMenuInitializedListener = onPopupMenuInitializedListener
-  }
+}
 
-  /**
-   * sets a [OnPopupMenuInitializedListener] to the popup using a lambda.
-   * The [OnPopupMenuInitializedListener.onpopupmenuInitialized] will be invoked when inflating the
-   * body content of the popupmenu is finished.
-   */
-  fun setOnpopupmenuInitializedListener(block: (View) -> Unit) {
+/**
+ * sets a [OnPopupMenuInitializedListener] to the popup using a lambda.
+ * The [OnPopupMenuInitializedListener.onpopupmenuInitialized] will be invoked when inflating the
+ * body content of the popupmenu is finished.
+ */
+fun setOnpopupmenuInitializedListener(block: (View) -> Unit) {
     setOnpopupmenuInitializedListener(OnPopupMenuInitializedListener(block))
-  }
+}
 
-  /** sets a [OnPopupMenuDismissListener] to the popup. */
-  fun setOnPopupMenuDismissListener(onPopupMenuDismissListener: OnPopupMenuDismissListener?) {
+/** sets a [OnPopupMenuDismissListener] to the popup. */
+fun setOnPopupMenuDismissListener(onPopupMenuDismissListener: OnPopupMenuDismissListener?) {
     this.bodyWindow.setOnDismissListener {
-      this@PaytmOverflowMenu.dismiss()
-      onPopupMenuDismissListener?.onpopupmenuDismiss()
+        this@PaytmOverflowMenu.dismiss()
+        onPopupMenuDismissListener?.onpopupmenuDismiss()
     }
-  }
+}
 
-  /** sets a [OnPopupMenuDismissListener] to the popup using lambda. */
-  fun setOnPopupMenuDismissListener(block: () -> Unit) {
+/** sets a [OnPopupMenuDismissListener] to the popup using lambda. */
+fun setOnPopupMenuDismissListener(block: () -> Unit) {
     setOnPopupMenuDismissListener(OnPopupMenuDismissListener(block))
-  }
+}
 
-  /** sets a [OnPopupMenuOutsideTouchListener] to the popup. */
-  fun setOnPopupMenuOutsideTouchListener(onPopupMenuOutsideTouchListener: OnPopupMenuOutsideTouchListener?) {
+/** sets a [OnPopupMenuOutsideTouchListener] to the popup. */
+fun setOnPopupMenuOutsideTouchListener(onPopupMenuOutsideTouchListener: OnPopupMenuOutsideTouchListener?) {
     this.bodyWindow.setTouchInterceptor(
-      object : View.OnTouchListener {
-        @SuppressLint("ClickableViewAccessibility")
-        override fun onTouch(view: View, event: MotionEvent): Boolean {
-          if (event.action == MotionEvent.ACTION_OUTSIDE) {
-            if (builder.dismissWhenTouchOutside) {
-              this@PaytmOverflowMenu.dismiss()
+        object : View.OnTouchListener {
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouch(view: View, event: MotionEvent): Boolean {
+                if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                    if (builder.dismissWhenTouchOutside) {
+                        this@PaytmOverflowMenu.dismiss()
+                    }
+                    onPopupMenuOutsideTouchListener?.onpopupmenuOutsideTouch(view, event)
+                    return true
+                }
+                return false
             }
-            onPopupMenuOutsideTouchListener?.onpopupmenuOutsideTouch(view, event)
-            return true
-          }
-          return false
         }
-      }
     )
-  }
+}
 
-  /** sets a [OnPopupMenuOutsideTouchListener] to the popup using lambda. */
-  fun setOnPopupMenuOutsideTouchListener(block: (View, MotionEvent) -> Unit) {
+/** sets a [OnPopupMenuOutsideTouchListener] to the popup using lambda. */
+fun setOnPopupMenuOutsideTouchListener(block: (View, MotionEvent) -> Unit) {
     setOnPopupMenuOutsideTouchListener(
-      OnPopupMenuOutsideTouchListener(block)
+        OnPopupMenuOutsideTouchListener(block)
     )
-  }
+}
 
-  /** sets a [View.OnTouchListener] to the popup. */
-  fun setOnpopupmenuTouchListener(onTouchListener: View.OnTouchListener?) {
+/** sets a [View.OnTouchListener] to the popup. */
+fun setOnpopupmenuTouchListener(onTouchListener: View.OnTouchListener?) {
     if (onTouchListener != null) {
-      this.bodyWindow.setTouchInterceptor(onTouchListener)
+        this.bodyWindow.setTouchInterceptor(onTouchListener)
     }
-  }
+}
 
 
-
-  /**
-   * sets whether the popup window will be attached in the decor frame of its parent window.
-   * If you want to show up popupmenu on your DialogFragment, it's recommended to use with true. (#131)
-   */
-  fun setIsAttachedInDecor(value: Boolean) = apply {
+/**
+ * sets whether the popup window will be attached in the decor frame of its parent window.
+ * If you want to show up popupmenu on your DialogFragment, it's recommended to use with true. (#131)
+ */
+fun setIsAttachedInDecor(value: Boolean) = apply {
     runOnAfterSDK22 {
-      this.bodyWindow.isAttachedInDecor = value
+        this.bodyWindow.isAttachedInDecor = value
     }
-  }
+}
 
-  /** gets measured width size of the popupmenu popup. */
-  fun getMeasuredWidth(): Int {
+/** gets measured width size of the popupmenu popup. */
+fun getMeasuredWidth(): Int {
     val displayWidth = displaySize.x
     return when {
-      builder.widthRatio != NO_Float_VALUE ->
-        (displayWidth * builder.widthRatio).toInt()
-      builder.minWidthRatio != NO_Float_VALUE || builder.maxWidthRatio != NO_Float_VALUE -> {
-        val maxWidthRatio =
-          if (builder.maxWidthRatio != NO_Float_VALUE) builder.maxWidthRatio else 1f
-        binding.root.measuredWidth.coerceIn(
-          (displayWidth * builder.minWidthRatio).toInt(),
-          (displayWidth * maxWidthRatio).toInt()
-        )
-      }
-      builder.width != PopupMenuSizeSpec.WRAP -> builder.width.coerceAtMost(displayWidth)
-      else -> binding.root.measuredWidth.coerceIn(builder.minWidth, builder.maxWidth)
+        builder.widthRatio != NO_Float_VALUE ->
+            (displayWidth * builder.widthRatio).toInt()
+        builder.minWidthRatio != NO_Float_VALUE || builder.maxWidthRatio != NO_Float_VALUE -> {
+            val maxWidthRatio =
+                if (builder.maxWidthRatio != NO_Float_VALUE) builder.maxWidthRatio else 1f
+            binding.root.measuredWidth.coerceIn(
+                (displayWidth * builder.minWidthRatio).toInt(),
+                (displayWidth * maxWidthRatio).toInt()
+            )
+        }
+        builder.width != PopupMenuSizeSpec.WRAP -> builder.width.coerceAtMost(displayWidth)
+        else -> binding.root.measuredWidth.coerceIn(builder.minWidth, builder.maxWidth)
     }
-  }
+}
 
-  /**
-   * Measures the width of a [AppCompatTextView] and set the measured with.
-   * If the width of the parent XML layout is the `WRAP_CONTENT`, and the width of [AppCompatTextView]
-   * in the parent layout is `WRAP_CONTENT`, this method will measure the size of the width exactly.
-   *
-   * @param textView a target textView for measuring text width.
-   */
-  private fun measureTextWidth(textView: AppCompatTextView, rootView: View) {
+/**
+ * Measures the width of a [AppCompatTextView] and set the measured with.
+ * If the width of the parent XML layout is the `WRAP_CONTENT`, and the width of [AppCompatTextView]
+ * in the parent layout is `WRAP_CONTENT`, this method will measure the size of the width exactly.
+ *
+ * @param textView a target textView for measuring text width.
+ */
+private fun measureTextWidth(textView: AppCompatTextView, rootView: View) {
     with(textView) {
-      var measuredTextWidth = textView.paint.measureText(textView.text.toString()).toInt()
-      if (compoundDrawablesRelative.isExistHorizontalDrawable()) {
-        minHeight = compoundDrawablesRelative.getIntrinsicHeight()
-        measuredTextWidth += compoundDrawablesRelative.getSumOfIntrinsicWidth() + sumOfCompoundPadding
-      } else if (compoundDrawables.isExistHorizontalDrawable()) {
-        minHeight = compoundDrawables.getIntrinsicHeight()
-        measuredTextWidth += compoundDrawables.getSumOfIntrinsicWidth() + sumOfCompoundPadding
-      }
-      maxWidth = getMeasuredTextWidth(measuredTextWidth, rootView)
+        var measuredTextWidth = textView.paint.measureText(textView.text.toString()).toInt()
+        if (compoundDrawablesRelative.isExistHorizontalDrawable()) {
+            minHeight = compoundDrawablesRelative.getIntrinsicHeight()
+            measuredTextWidth += compoundDrawablesRelative.getSumOfIntrinsicWidth() + sumOfCompoundPadding
+        } else if (compoundDrawables.isExistHorizontalDrawable()) {
+            minHeight = compoundDrawables.getIntrinsicHeight()
+            measuredTextWidth += compoundDrawables.getSumOfIntrinsicWidth() + sumOfCompoundPadding
+        }
+        maxWidth = getMeasuredTextWidth(measuredTextWidth, rootView)
     }
-  }
+}
 
-  /**
-   * Traverse a [ViewGroup]'s view hierarchy and measure each [AppCompatTextView] for measuring
-   * the specific height of the [AppCompatTextView] and calculating the proper height size of the popupmenu.
-   *
-   * @param parent a parent view for traversing and measuring.
-   */
-  private fun traverseAndMeasureTextWidth(parent: ViewGroup) {
+/**
+ * Traverse a [ViewGroup]'s view hierarchy and measure each [AppCompatTextView] for measuring
+ * the specific height of the [AppCompatTextView] and calculating the proper height size of the popupmenu.
+ *
+ * @param parent a parent view for traversing and measuring.
+ */
+private fun traverseAndMeasureTextWidth(parent: ViewGroup) {
     parent.forEach { child ->
-      if (child is AppCompatTextView) {
-        measureTextWidth(child, parent)
-      } else if (child is ViewGroup) {
-        traverseAndMeasureTextWidth(child)
-      }
+        if (child is AppCompatTextView) {
+            measureTextWidth(child, parent)
+        } else if (child is ViewGroup) {
+            traverseAndMeasureTextWidth(child)
+        }
     }
-  }
+}
 
-  /** gets measured width size of the popupmenu popup text label. */
-  private fun getMeasuredTextWidth(measuredWidth: Int, rootView: View): Int {
+/** gets measured width size of the popupmenu popup text label. */
+private fun getMeasuredTextWidth(measuredWidth: Int, rootView: View): Int {
     val displayWidth = displaySize.x
     val spaces = rootView.paddingLeft + rootView.paddingRight + if (builder.iconDrawable != null) {
-      builder.iconWidth + builder.iconSpace
+        builder.iconWidth + builder.iconSpace
     } else 0 + builder.marginRight + builder.marginLeft + (builder.arrowSize * 2)
     val maxTextWidth = builder.maxWidth - spaces
 
     return when {
-      builder.widthRatio != NO_Float_VALUE ->
-        (displayWidth * builder.widthRatio).toInt() - spaces
-      builder.minWidthRatio != NO_Float_VALUE || builder.maxWidthRatio != NO_Float_VALUE -> {
-        val maxWidthRatio =
-          if (builder.maxWidthRatio != NO_Float_VALUE) builder.maxWidthRatio else 1f
-        measuredWidth.coerceAtMost((displayWidth * maxWidthRatio).toInt() - spaces)
-      }
-      builder.width != PopupMenuSizeSpec.WRAP && builder.width <= displayWidth ->
-        builder.width - spaces
-      else -> measuredWidth.coerceAtMost(maxTextWidth)
+        builder.widthRatio != NO_Float_VALUE ->
+            (displayWidth * builder.widthRatio).toInt() - spaces
+        builder.minWidthRatio != NO_Float_VALUE || builder.maxWidthRatio != NO_Float_VALUE -> {
+            val maxWidthRatio =
+                if (builder.maxWidthRatio != NO_Float_VALUE) builder.maxWidthRatio else 1f
+            measuredWidth.coerceAtMost((displayWidth * maxWidthRatio).toInt() - spaces)
+        }
+        builder.width != PopupMenuSizeSpec.WRAP && builder.width <= displayWidth ->
+            builder.width - spaces
+        else -> measuredWidth.coerceAtMost(maxTextWidth)
     }
-  }
+}
 
-  /** gets measured height size of the popupmenu popup. */
-  fun getMeasuredHeight(): Int {
+/** gets measured height size of the popupmenu popup. */
+fun getMeasuredHeight(): Int {
     if (builder.height != PopupMenuSizeSpec.WRAP) {
-      return builder.height
+        return builder.height
     }
     return this.binding.root.measuredHeight
-  }
+}
 
-  /** gets a content view of the popupmenu popup window. */
-  fun getContentView(): ViewGroup {
+/** gets a content view of the popupmenu popup window. */
+fun getContentView(): ViewGroup {
     return binding.popupmenuCard
-  }
+}
 
-  /** gets a arrow view of the popupmenu popup window. */
-  fun getpopupmenuArrowView(): View {
+/** gets a arrow view of the popupmenu popup window. */
+fun getpopupmenuArrowView(): View {
     return binding.popupmenuArrow
-  }
+}
 
-  /** dismiss when the [LifecycleOwner] be on paused. */
-  @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-  fun onPause() {
+/** dismiss when the [LifecycleOwner] be on paused. */
+@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+fun onPause() {
     if (builder.dismissWhenLifecycleOnPause) {
-      dismiss()
+        dismiss()
     }
-  }
+}
 
-  /** dismiss automatically when lifecycle owner is destroyed. */
-  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-  fun onDestroy() {
+/** dismiss automatically when lifecycle owner is destroyed. */
+@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+fun onDestroy() {
     this.destroyed = true
     this.bodyWindow.dismiss()
-  }
+}
 
-  /** Builder class for creating [PaytmOverflowMenu]. */
-  class Builder(private val context: Context) {
+/** Builder class for creating [PaytmOverflowMenu]. */
+class Builder(private val context: Context) {
     @JvmField
     @Px
     var width: Int = PopupMenuSizeSpec.WRAP
@@ -1190,8 +1076,8 @@ class PaytmOverflowMenu(
     var arrowSize: Int = 12.dp
 
     val arrowHalfSize: Float
-    @Px
-    inline get() = arrowSize * 0.5f
+        @Px
+        inline get() = arrowSize * 0.5f
 
     @JvmField
     @FloatRange(from = 0.0, to = 1.0)
@@ -1202,10 +1088,10 @@ class PaytmOverflowMenu(
 
     @JvmField
     var arrowOrientationRules: ArrowOrientationRules =
-      ArrowOrientationRules.ALIGN_ANCHOR
+        ArrowOrientationRules.ALIGN_ANCHOR
 
     @JvmField
-    var arrowOrientation: ArrowOrientation = ArrowOrientation.BOTTOM
+    var arrowAlignment: PopupMenuAlignment = PopupMenuAlignment.BOTTOMLEFT
 
     @JvmField
     var arrowDrawable: Drawable? = null
@@ -1355,7 +1241,7 @@ class PaytmOverflowMenu(
 
     @JvmField
     var isRtlLayout: Boolean =
-      context.resources.configuration.layoutDirection == LayoutDirection.RTL
+        context.resources.configuration.layoutDirection == LayoutDirection.RTL
 
     @JvmField
     var supportRtlLayoutFactor: Int = LTR.unaryMinus(isRtlLayout)
@@ -1371,15 +1257,15 @@ class PaytmOverflowMenu(
 
     /** sets the width size. */
     fun setWidth(@Dp value: Int): Builder = apply {
-      require(
-        value > 0 || value == PopupMenuSizeSpec.WRAP
-      ) { "The width of the popupmenu must bigger than zero." }
-      this.width = value.dp
+        require(
+            value > 0 || value == PopupMenuSizeSpec.WRAP
+        ) { "The width of the popupmenu must bigger than zero." }
+        this.width = value.dp
     }
 
     /** sets the width size using a dimension resource. */
     fun setWidthResource(@DimenRes value: Int): Builder = apply {
-      this.width = context.dimenPixel(value)
+        this.width = context.dimenPixel(value)
     }
 
     /**
@@ -1387,7 +1273,7 @@ class PaytmOverflowMenu(
      * this functionality works only with the [popupmenuSizeSpec.WRAP].
      */
     fun setMinWidth(@Dp value: Int): Builder = apply {
-      this.minWidth = value.dp
+        this.minWidth = value.dp
     }
 
     /**
@@ -1395,7 +1281,7 @@ class PaytmOverflowMenu(
      * this functionality works only with the [popupmenuSizeSpec.WRAP].
      */
     fun setMinWidthResource(@DimenRes value: Int): Builder = apply {
-      this.minWidth = context.dimenPixel(value)
+        this.minWidth = context.dimenPixel(value)
     }
 
     /**
@@ -1403,7 +1289,7 @@ class PaytmOverflowMenu(
      * this functionality works only with the [popupmenuSizeSpec.WRAP].
      */
     fun setMaxWidth(@Dp value: Int): Builder = apply {
-      this.maxWidth = value.dp
+        this.maxWidth = value.dp
     }
 
     /**
@@ -1411,88 +1297,88 @@ class PaytmOverflowMenu(
      * this functionality works only with the [popupmenuSizeSpec.WRAP].
      */
     fun setMaxWidthResource(@DimenRes value: Int): Builder = apply {
-      this.maxWidth = context.dimenPixel(value)
+        this.maxWidth = context.dimenPixel(value)
     }
 
     /** sets the width size by the display screen size ratio. */
     fun setWidthRatio(
-      @FloatRange(from = 0.0, to = 1.0) value: Float
+        @FloatRange(from = 0.0, to = 1.0) value: Float
     ): Builder = apply { this.widthRatio = value }
 
     /** sets the minimum width size by the display screen size ratio. */
     fun setMinWidthRatio(
-      @FloatRange(from = 0.0, to = 1.0) value: Float
+        @FloatRange(from = 0.0, to = 1.0) value: Float
     ): Builder = apply { this.minWidthRatio = value }
 
     /** sets the maximum width size by the display screen size ratio. */
     fun setMaxWidthRatio(
-      @FloatRange(from = 0.0, to = 1.0) value: Float
+        @FloatRange(from = 0.0, to = 1.0) value: Float
     ): Builder = apply { this.maxWidthRatio = value }
 
     /** sets the height size. */
     fun setHeight(@Dp value: Int): Builder = apply {
-      require(
-        value > 0 || value == PopupMenuSizeSpec.WRAP
-      ) { "The height of the popupmenu must bigger than zero." }
-      this.height = value.dp
+        require(
+            value > 0 || value == PopupMenuSizeSpec.WRAP
+        ) { "The height of the popupmenu must bigger than zero." }
+        this.height = value.dp
     }
 
     /** sets the height size using a dimension resource. */
     fun setHeightResource(@DimenRes value: Int): Builder = apply {
-      this.height = context.dimenPixel(value)
+        this.height = context.dimenPixel(value)
     }
 
     /** sets the width and height sizes of the popupmenu. */
     fun setSize(@Dp width: Int, @Dp height: Int): Builder = apply {
-      setWidth(width)
-      setHeight(height)
+        setWidth(width)
+        setHeight(height)
     }
 
     /** sets the width and height sizes of the popupmenu using a dimension resource. */
     fun setSizeResource(@DimenRes width: Int, @DimenRes height: Int): Builder = apply {
-      setWidthResource(width)
-      setHeightResource(height)
+        setWidthResource(width)
+        setHeightResource(height)
     }
 
     /** sets the padding on the popupmenu content all directions. */
     fun setPadding(@Dp value: Int): Builder = apply {
-      setPaddingLeft(value)
-      setPaddingTop(value)
-      setPaddingRight(value)
-      setPaddingBottom(value)
+        setPaddingLeft(value)
+        setPaddingTop(value)
+        setPaddingRight(value)
+        setPaddingBottom(value)
     }
 
     /** sets the padding on the popupmenu content all directions using dimension resource. */
     fun setPaddingResource(@DimenRes value: Int): Builder = apply {
-      val padding = context.dimenPixel(value)
-      this.paddingLeft = padding
-      this.paddingTop = padding
-      this.paddingRight = padding
-      this.paddingBottom = padding
+        val padding = context.dimenPixel(value)
+        this.paddingLeft = padding
+        this.paddingTop = padding
+        this.paddingRight = padding
+        this.paddingBottom = padding
     }
 
     /** sets the horizontal (right and left) padding on the popupmenu content. */
     fun setPaddingHorizontal(@Dp value: Int): Builder = apply {
-      setPaddingLeft(value)
-      setPaddingRight(value)
+        setPaddingLeft(value)
+        setPaddingRight(value)
     }
 
     /** sets the horizontal (right and left) padding on the popupmenu content using dimension resource. */
     fun setPaddingHorizontalResource(@DimenRes value: Int): Builder = apply {
-      setPaddingLeftResource(value)
-      setPaddingRightResource(value)
+        setPaddingLeftResource(value)
+        setPaddingRightResource(value)
     }
 
     /** sets the vertical (top and bottom) padding on the popupmenu content. */
     fun setPaddingVertical(@Dp value: Int): Builder = apply {
-      setPaddingTop(value)
-      setPaddingBottom(value)
+        setPaddingTop(value)
+        setPaddingBottom(value)
     }
 
     /** sets the vertical (top and bottom) padding on the popupmenu content using dimension resource. */
     fun setPaddingVerticalResource(@DimenRes value: Int): Builder = apply {
-      setPaddingTopResource(value)
-      setPaddingBottomResource(value)
+        setPaddingTopResource(value)
+        setPaddingBottomResource(value)
     }
 
     /** sets the left padding on the popupmenu content. */
@@ -1500,7 +1386,7 @@ class PaytmOverflowMenu(
 
     /** sets the left padding on the popupmenu content using dimension resource. */
     fun setPaddingLeftResource(@DimenRes value: Int): Builder = apply {
-      this.paddingLeft = context.dimenPixel(value)
+        this.paddingLeft = context.dimenPixel(value)
     }
 
     /** sets the top padding on the popupmenu content. */
@@ -1508,108 +1394,108 @@ class PaytmOverflowMenu(
 
     /** sets the top padding on the popupmenu content using dimension resource. */
     fun setPaddingTopResource(@DimenRes value: Int): Builder = apply {
-      this.paddingTop = context.dimenPixel(value)
+        this.paddingTop = context.dimenPixel(value)
     }
 
     /** sets the right padding on the popupmenu content. */
     fun setPaddingRight(@Dp value: Int): Builder = apply {
-      this.paddingRight = value.dp
+        this.paddingRight = value.dp
     }
 
     /** sets the right padding on the popupmenu content using dimension resource. */
     fun setPaddingRightResource(@DimenRes value: Int): Builder = apply {
-      this.paddingRight = context.dimenPixel(value)
+        this.paddingRight = context.dimenPixel(value)
     }
 
     /** sets the bottom padding on the popupmenu content. */
     fun setPaddingBottom(@Dp value: Int): Builder = apply {
-      this.paddingBottom = value.dp
+        this.paddingBottom = value.dp
     }
 
     /** sets the bottom padding on the popupmenu content using dimension resource. */
     fun setPaddingBottomResource(@DimenRes value: Int): Builder = apply {
-      this.paddingBottom = context.dimenPixel(value)
+        this.paddingBottom = context.dimenPixel(value)
     }
 
     /** sets the margin on the popupmenu all directions. */
     fun setMargin(@Dp value: Int): Builder = apply {
-      setMarginLeft(value)
-      setMarginTop(value)
-      setMarginRight(value)
-      setMarginBottom(value)
+        setMarginLeft(value)
+        setMarginTop(value)
+        setMarginRight(value)
+        setMarginBottom(value)
     }
 
     /** sets the margin on the popupmenu all directions using a dimension resource. */
     fun setMarginResource(@DimenRes value: Int): Builder = apply {
-      val margin = context.dimenPixel(value)
-      this.marginLeft = margin
-      this.marginTop = margin
-      this.marginRight = margin
-      this.marginBottom = margin
+        val margin = context.dimenPixel(value)
+        this.marginLeft = margin
+        this.marginTop = margin
+        this.marginRight = margin
+        this.marginBottom = margin
     }
 
     /** sets the horizontal (left and right) margins on the popupmenu. */
     fun setMarginHorizontal(@Dp value: Int): Builder = apply {
-      setMarginLeft(value)
-      setMarginRight(value)
+        setMarginLeft(value)
+        setMarginRight(value)
     }
 
     /** sets the horizontal (left and right) margins on the popupmenu using a dimension resource. */
     fun setMarginHorizontalResource(@DimenRes value: Int): Builder = apply {
-      setMarginLeftResource(value)
-      setMarginRightResource(value)
+        setMarginLeftResource(value)
+        setMarginRightResource(value)
     }
 
     /** sets the vertical (top and bottom) margins on the popupmenu. */
     fun setMarginVertical(@Dp value: Int): Builder = apply {
-      setMarginTop(value)
-      setMarginBottom(value)
+        setMarginTop(value)
+        setMarginBottom(value)
     }
 
     /** sets the vertical (top and bottom) margins on the popupmenu using a dimension resource. */
     fun setMarginVerticalResource(@DimenRes value: Int): Builder = apply {
-      setMarginTopResource(value)
-      setMarginBottomResource(value)
+        setMarginTopResource(value)
+        setMarginBottomResource(value)
     }
 
     /** sets the left margin on the popupmenu. */
     fun setMarginLeft(@Dp value: Int): Builder = apply {
-      this.marginLeft = value.dp
+        this.marginLeft = value.dp
     }
 
     /** sets the left margin on the popupmenu using dimension resource. */
     fun setMarginLeftResource(@DimenRes value: Int): Builder = apply {
-      this.marginLeft = context.dimenPixel(value)
+        this.marginLeft = context.dimenPixel(value)
     }
 
     /** sets the top margin on the popupmenu. */
     fun setMarginTop(@Dp value: Int): Builder = apply {
-      this.marginTop = value.dp
+        this.marginTop = value.dp
     }
 
     /** sets the top margin on the popupmenu using dimension resource. */
     fun setMarginTopResource(@DimenRes value: Int): Builder = apply {
-      this.marginTop = context.dimenPixel(value)
+        this.marginTop = context.dimenPixel(value)
     }
 
     /** sets the right margin on the popupmenu. */
     fun setMarginRight(@Dp value: Int): Builder = apply {
-      this.marginRight = value.dp
+        this.marginRight = value.dp
     }
 
     /** sets the right margin on the popupmenu using dimension resource. */
     fun setMarginRightResource(@DimenRes value: Int): Builder = apply {
-      this.marginRight = context.dimenPixel(value)
+        this.marginRight = context.dimenPixel(value)
     }
 
     /** sets the bottom margin on the popupmenu. */
     fun setMarginBottom(@Dp value: Int): Builder = apply {
-      this.marginBottom = value.dp
+        this.marginBottom = value.dp
     }
 
     /** sets the bottom margin on the popupmenu using dimension resource. */
     fun setMarginBottomResource(@DimenRes value: Int): Builder = apply {
-      this.marginBottom = context.dimenPixel(value)
+        this.marginBottom = context.dimenPixel(value)
     }
 
     /** sets the visibility of the arrow. */
@@ -1623,32 +1509,32 @@ class PaytmOverflowMenu(
      * Overrides [arrowColor]. Does not work with custom arrows.
      */
     fun setArrowColorMatchpopupmenu(value: Boolean): Builder = apply {
-      this.arrowColorMatchpopupmenu = value
+        this.arrowColorMatchpopupmenu = value
     }
 
     /** sets a color of the arrow using a resource. */
     fun setArrowColorResource(@ColorRes value: Int): Builder = apply {
-      this.arrowColor = context.contextColor(value)
+        this.arrowColor = context.contextColor(value)
     }
 
     /** sets the size of the arrow. */
     fun setArrowSize(@Dp value: Int): Builder = apply {
-      this.arrowSize =
-        if (value == PopupMenuSizeSpec.WRAP) {
-          PopupMenuSizeSpec.WRAP
-        } else {
-          value.dp
-        }
+        this.arrowSize =
+            if (value == PopupMenuSizeSpec.WRAP) {
+                PopupMenuSizeSpec.WRAP
+            } else {
+                value.dp
+            }
     }
 
     /** sets the size of the arrow using dimension resource. */
     fun setArrowSizeResource(@DimenRes value: Int): Builder = apply {
-      this.arrowSize = context.dimenPixel(value)
+        this.arrowSize = context.dimenPixel(value)
     }
 
-    /** sets the arrow position by popup size ration. The popup size depends on [arrowOrientation]. */
+    /** sets the arrow position by popup size ration. The popup size depends on [arrowAlignment]. */
     fun setArrowPosition(
-      @FloatRange(from = 0.0, to = 1.0) value: Float
+        @FloatRange(from = 0.0, to = 1.0) value: Float
     ): Builder = apply { this.arrowPosition = value }
 
     /**
@@ -1660,8 +1546,8 @@ class PaytmOverflowMenu(
     fun setArrowPositionRules(value: ArrowPositionRules) = apply { this.arrowPositionRules = value }
 
     /** sets the arrow orientation using [ArrowOrientation]. */
-    fun setArrowOrientation(value: ArrowOrientation): Builder = apply {
-      this.arrowOrientation = value
+    fun setArrowOrientation(value: PopupMenuAlignment): Builder = apply {
+        this.arrowAlignment = value
     }
 
     /**
@@ -1671,87 +1557,87 @@ class PaytmOverflowMenu(
      * [ArrowOrientationRules.ALIGN_FIXED]: Align to fixed [ArrowOrientation].
      */
     fun setArrowOrientationRules(value: ArrowOrientationRules) = apply {
-      this.arrowOrientationRules = value
+        this.arrowOrientationRules = value
     }
 
     /** sets a custom drawable of the arrow. */
     fun setArrowDrawable(value: Drawable?): Builder = apply {
-      this.arrowDrawable = value?.mutate()
-      if (value != null && arrowSize == PopupMenuSizeSpec.WRAP) {
-        arrowSize = max(value.intrinsicWidth, value.intrinsicHeight)
-      }
+        this.arrowDrawable = value?.mutate()
+        if (value != null && arrowSize == PopupMenuSizeSpec.WRAP) {
+            arrowSize = max(value.intrinsicWidth, value.intrinsicHeight)
+        }
     }
 
     /** sets a custom drawable of the arrow using the resource. */
     fun setArrowDrawableResource(@DrawableRes value: Int): Builder = apply {
-      setArrowDrawable(context.contextDrawable(value))
+        setArrowDrawable(context.contextDrawable(value))
     }
 
     /** sets the left padding of the arrow. */
     fun setArrowLeftPadding(@Dp value: Int): Builder = apply {
-      this.arrowLeftPadding = value.dp
+        this.arrowLeftPadding = value.dp
     }
 
     /** sets the left padding of the arrow using the resource. */
     fun setArrowLeftPaddingResource(@DimenRes value: Int): Builder = apply {
-      this.arrowLeftPadding = context.dimenPixel(value)
+        this.arrowLeftPadding = context.dimenPixel(value)
     }
 
     /** sets the right padding of the arrow. */
     fun setArrowRightPadding(@Dp value: Int): Builder = apply {
-      this.arrowRightPadding = value.dp
+        this.arrowRightPadding = value.dp
     }
 
     /** sets the right padding of the arrow using the resource. */
     fun setArrowRightPaddingResource(@DimenRes value: Int): Builder = apply {
-      this.arrowRightPadding = context.dimenPixel(value)
+        this.arrowRightPadding = context.dimenPixel(value)
     }
 
     /** sets the top padding of the arrow. */
     fun setArrowTopPadding(@Dp value: Int): Builder = apply {
-      this.arrowTopPadding = value.dp
+        this.arrowTopPadding = value.dp
     }
 
     /** sets the top padding of the arrow using the resource. */
     fun setArrowTopPaddingResource(@DimenRes value: Int): Builder = apply {
-      this.arrowTopPadding = context.dimenPixel(value)
+        this.arrowTopPadding = context.dimenPixel(value)
     }
 
     /** sets the bottom padding of the arrow. */
     fun setArrowBottomPadding(@Dp value: Int): Builder = apply {
-      this.arrowBottomPadding = value.dp
+        this.arrowBottomPadding = value.dp
     }
 
     /** sets the bottom padding of the arrow using the resource. */
     fun setArrowBottomPaddingResource(@DimenRes value: Int): Builder = apply {
-      this.arrowBottomPadding = context.dimenPixel(value)
+        this.arrowBottomPadding = context.dimenPixel(value)
     }
 
     /** sets the padding of the arrow when aligning anchor using with [ArrowPositionRules.ALIGN_ANCHOR]. */
     fun setArrowAlignAnchorPadding(@Dp value: Int): Builder = apply {
-      this.arrowAlignAnchorPadding = value.dp
+        this.arrowAlignAnchorPadding = value.dp
     }
 
     /** sets the padding of the arrow the resource when aligning anchor using with [ArrowPositionRules.ALIGN_ANCHOR]. */
     fun setArrowAlignAnchorPaddingResource(@DimenRes value: Int): Builder = apply {
-      this.arrowAlignAnchorPadding = context.dimenPixel(value)
+        this.arrowAlignAnchorPadding = context.dimenPixel(value)
     }
 
     /** sets the padding ratio of the arrow when aligning anchor using with [ArrowPositionRules.ALIGN_ANCHOR]. */
     fun setArrowAlignAnchorPaddingRatio(value: Float): Builder = apply {
-      this.arrowAlignAnchorPaddingRatio = value
+        this.arrowAlignAnchorPaddingRatio = value
     }
 
     /** sets the elevation of the arrow. */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     fun setArrowElevation(@Dp value: Int): Builder = apply {
-      this.arrowElevation = value.dp.toFloat()
+        this.arrowElevation = value.dp.toFloat()
     }
 
     /** sets the elevation of the arrow using dimension resource. */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     fun setArrowElevationResource(@DimenRes value: Int): Builder = apply {
-      this.arrowElevation = context.dimen(value)
+        this.arrowElevation = context.dimen(value)
     }
 
     /** sets the background color of the arrow and popup. */
@@ -1759,27 +1645,27 @@ class PaytmOverflowMenu(
 
     /** sets the background color of the arrow and popup using the resource color. */
     fun setBackgroundColorResource(@ColorRes value: Int): Builder = apply {
-      this.backgroundColor = context.contextColor(value)
+        this.backgroundColor = context.contextColor(value)
     }
 
     /** sets the background drawable of the popup. */
     fun setBackgroundDrawable(value: Drawable?): Builder = apply {
-      this.backgroundDrawable = value?.mutate()
+        this.backgroundDrawable = value?.mutate()
     }
 
     /** sets the background drawable of the popup by the resource. */
     fun setBackgroundDrawableResource(@DrawableRes value: Int): Builder = apply {
-      this.backgroundDrawable = context.contextDrawable(value)?.mutate()
+        this.backgroundDrawable = context.contextDrawable(value)?.mutate()
     }
 
     /** sets the corner radius of the popup. */
     fun setCornerRadius(@Dp value: Float): Builder = apply {
-      this.cornerRadius = value.dp
+        this.cornerRadius = value.dp
     }
 
     /** sets the corner radius of the popup using dimension resource. */
     fun setCornerRadiusResource(@DimenRes value: Int): Builder = apply {
-      this.cornerRadius = context.dimen(value)
+        this.cornerRadius = context.dimen(value)
     }
 
     /** sets the main text content of the popup. */
@@ -1787,7 +1673,7 @@ class PaytmOverflowMenu(
 
     /** sets the main text content of the popup using resource. */
     fun setTextResource(@StringRes value: Int): Builder = apply {
-      this.text = context.getString(value)
+        this.text = context.getString(value)
     }
 
     /** sets the color of the main text content. */
@@ -1795,7 +1681,7 @@ class PaytmOverflowMenu(
 
     /** sets the color of the main text content using the resource color. */
     fun setTextColorResource(@ColorRes value: Int): Builder = apply {
-      this.textColor = context.contextColor(value)
+        this.textColor = context.contextColor(value)
     }
 
     /** sets whether the text will be parsed as HTML (using Html.fromHtml(..)) */
@@ -1809,7 +1695,7 @@ class PaytmOverflowMenu(
 
     /** sets the size of the main text content using dimension resource. */
     fun setTextSizeResource(@DimenRes value: Int) = apply {
-      this.textSize = context.px2Sp(context.dimen(value))
+        this.textSize = context.px2Sp(context.dimen(value))
     }
 
     /** sets the typeface of the main text content. */
@@ -1823,7 +1709,7 @@ class PaytmOverflowMenu(
      * this only works when the width or setWidthRatio set explicitly.
      */
     fun setTextGravity(value: Int): Builder = apply {
-      this.textGravity = value
+        this.textGravity = value
     }
 
 
@@ -1832,39 +1718,39 @@ class PaytmOverflowMenu(
 
     /** sets the icon drawable of the popup using the resource. */
     fun setIconDrawableResource(@DrawableRes value: Int) = apply {
-      this.iconDrawable = context.contextDrawable(value)?.mutate()
+        this.iconDrawable = context.contextDrawable(value)?.mutate()
     }
 
     /** sets the width size of the icon drawable. */
     fun setIconWidth(@Dp value: Int): Builder = apply {
-      this.iconWidth = value.dp
+        this.iconWidth = value.dp
     }
 
     /** sets the width size of the icon drawable using the dimension resource. */
     fun setIconWidthResource(@DimenRes value: Int): Builder = apply {
-      this.iconWidth = context.dimenPixel(value)
+        this.iconWidth = context.dimenPixel(value)
     }
 
     /** sets the height size of the icon drawable. */
     fun setIconHeight(@Dp value: Int): Builder = apply {
-      this.iconHeight = value.dp
+        this.iconHeight = value.dp
     }
 
     /** sets the height size of the icon drawable using the dimension resource. */
     fun setIconHeightResource(@DimenRes value: Int): Builder = apply {
-      this.iconHeight = context.dimenPixel(value)
+        this.iconHeight = context.dimenPixel(value)
     }
 
     /** sets the size of the icon drawable. */
     fun setIconSize(@Dp value: Int): Builder = apply {
-      setIconWidth(value)
-      setIconHeight(value)
+        setIconWidth(value)
+        setIconHeight(value)
     }
 
     /** sets the size of the icon drawable using the dimension resource. */
     fun setIconSizeResource(@DimenRes value: Int): Builder = apply {
-      setIconWidthResource(value)
-      setIconHeightResource(value)
+        setIconWidthResource(value)
+        setIconHeightResource(value)
     }
 
     /** sets the color of the icon drawable. */
@@ -1872,7 +1758,7 @@ class PaytmOverflowMenu(
 
     /** sets the color of the icon drawable using the resource color. */
     fun setIconColorResource(@ColorRes value: Int): Builder = apply {
-      this.iconColor = context.contextColor(value)
+        this.iconColor = context.contextColor(value)
     }
 
     /** sets the space between the icon and the main text content. */
@@ -1880,25 +1766,25 @@ class PaytmOverflowMenu(
 
     /** sets the space between the icon and the main text content using dimension resource. */
     fun setIconSpaceResource(@DimenRes value: Int): Builder = apply {
-      this.iconSpace = context.dimenPixel(value)
+        this.iconSpace = context.dimenPixel(value)
     }
 
 
     /** sets the alpha value to the popup. */
     fun setAlpha(@FloatRange(from = 0.0, to = 1.0) value: Float): Builder = apply {
-      this.alpha = value
+        this.alpha = value
     }
 
     /** sets the elevation to the popup. */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     fun setElevation(@Dp value: Int): Builder = apply {
-      this.elevation = value.dp.toFloat()
+        this.elevation = value.dp.toFloat()
     }
 
     /** sets the elevation to the popup using dimension resource. */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     fun setElevationResource(@DimenRes value: Int): Builder = apply {
-      this.elevation = context.dimen(value)
+        this.elevation = context.dimen(value)
     }
 
     /** sets the custom layout resource to the popup content. */
@@ -1909,7 +1795,7 @@ class PaytmOverflowMenu(
 
     /** sets is status bar is visible or not in your screen. */
     fun setIsStatusBarVisible(value: Boolean) = apply {
-      this.isStatusBarVisible = value
+        this.isStatusBarVisible = value
     }
 
     /**
@@ -1917,7 +1803,7 @@ class PaytmOverflowMenu(
      * If you want to show up popupmenu on your DialogFragment, it's recommended to use with true. (#131)
      */
     fun setIsAttachedInDecor(value: Boolean) = apply {
-      this.isAttachedInDecor = value
+        this.isAttachedInDecor = value
     }
 
     /**
@@ -1927,8 +1813,7 @@ class PaytmOverflowMenu(
     fun setLifecycleOwner(value: LifecycleOwner?): Builder = apply { this.lifecycleOwner = value }
 
 
-
-//    /** sets a [OnPopupMenuClickListener] to the popup. */
+    //    /** sets a [OnPopupMenuClickListener] to the popup. */
 //    fun setOnpopupmenuClickListener(value: OnPopupMenuClickListener): Builder = apply {
 //      this.onPopupMenuClickListener = value
 //    }
@@ -1970,22 +1855,22 @@ class PaytmOverflowMenu(
 //    /** sets a [OnPopupMenuOutsideTouchListener] to the popup using lambda. */
 //
     fun setOnpopupmenuOutsideTouchListener(block: (View, MotionEvent) -> Unit): Builder = apply {
-      this.onPopupMenuOutsideTouchListener = OnPopupMenuOutsideTouchListener(block)
-      setDismissWhenTouchOutside(false)
+        this.onPopupMenuOutsideTouchListener = OnPopupMenuOutsideTouchListener(block)
+        setDismissWhenTouchOutside(false)
     }
 
 
     /** dismisses when touch outside. */
     fun setDismissWhenTouchOutside(value: Boolean): Builder = apply {
-      this.dismissWhenTouchOutside = value
-      if (!value) {
-        setFocusable(value)
-      }
+        this.dismissWhenTouchOutside = value
+        if (!value) {
+            setFocusable(value)
+        }
     }
 
     /** dismisses when invoked show function again. */
     fun setDismissWhenShowAgain(value: Boolean): Builder = apply {
-      this.dismissWhenShowAgain = value
+        this.dismissWhenShowAgain = value
     }
 
     /** dismisses when the popup clicked. */
@@ -1993,7 +1878,7 @@ class PaytmOverflowMenu(
 
     /** dismisses when the [LifecycleOwner] be on paused. */
     fun setDismissWhenLifecycleOnPause(value: Boolean): Builder = apply {
-      this.dismissWhenLifecycleOnPause = value
+        this.dismissWhenLifecycleOnPause = value
     }
 //
 //    /** dismisses automatically some milliseconds later when the popup is shown. */
@@ -2052,19 +1937,19 @@ class PaytmOverflowMenu(
      * @return A new created instance of the [PaytmOverflowMenu].
      */
     fun build(): PaytmOverflowMenu = PaytmOverflowMenu(
-      context = context,
-      builder = this@Builder
+        context = context,
+        builder = this@Builder
     )
-  }
+}
 
-  /**
-   * An abstract factory class for creating [PaytmOverflowMenu] instance.
-   * A factory implementation class must have a default (non-argument) constructor.
-   * This class is used to initialize an instance of the [PaytmOverflowMenu] lazily in Activities and Fragments.
-   *
-   * @see [Lazy Initialization](https://github.com/skydoves/popupmenu#lazy-initialization)
-   */
-  abstract class Factory {
+/**
+ * An abstract factory class for creating [PaytmOverflowMenu] instance.
+ * A factory implementation class must have a default (non-argument) constructor.
+ * This class is used to initialize an instance of the [PaytmOverflowMenu] lazily in Activities and Fragments.
+ *
+ * @see [Lazy Initialization](https://github.com/skydoves/popupmenu#lazy-initialization)
+ */
+abstract class Factory {
 
     /**
      * Creates a new instance of [PaytmOverflowMenu].
@@ -2072,5 +1957,5 @@ class PaytmOverflowMenu(
      * @return A new created instance of the [PaytmOverflowMenu].
      */
     abstract fun create(context: Context, lifecycle: LifecycleOwner?): PaytmOverflowMenu
-  }
+}
 }

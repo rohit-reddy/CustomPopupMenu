@@ -1,6 +1,6 @@
 
 
-package com.rohith.mycustompopupmenu.secondKit.util
+package com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil
 
 import com.rohith.mycustompopupmenu.secondKit.PaytmOverflowMenu
 
@@ -23,7 +23,7 @@ enum class ArrowOrientationRules {
   /**
    * Align depending on the position of an anchor.
    *
-   * For example, [PaytmOverflowMenu.Builder.arrowOrientation] is [ArrowOrientation.TOP] and we want to show up
+   * For example, [PaytmOverflowMenu.Builder.arrowAlignment] is [ArrowOrientation.TOP] and we want to show up
    * the balloon under an anchor using the [PaytmOverflowMenu.showAlignBottom].
    * However, if there is not enough free space to place the tooltip at the bottom of the anchor,
    * tooltips will be placed on top of the anchor and the orientation of the arrow will be [ArrowOrientation.BOTTOM].
@@ -33,7 +33,7 @@ enum class ArrowOrientationRules {
   /**
    * Align to fixed [ArrowOrientation].
    *
-   * The orientation of the arrow will be fixed by the specific [PaytmOverflowMenu.Builder.arrowOrientation].
+   * The orientation of the arrow will be fixed by the specific [PaytmOverflowMenu.Builder.arrowAlignment].
    */
   ALIGN_FIXED
 }
@@ -76,12 +76,12 @@ internal class AutoDismissRunnable(val paytmOverflowMenu: PaytmOverflowMenu) : R
 }
 
 
-/** BalloonCenterAlign is an aligning rule for the [PaytmOverflowMenu.showAtCenter]. */
-enum class PopupMenuCenterAlign {
-  START,
-  END,
-  TOP,
-  BOTTOM
+/** BalloonCenterAlign is an aligning rule for the [PaytmOverflowMenu.show]. */
+enum class PopupMenuAlignment {
+  BOTTOMRIGHT,
+  TOPRIGHT,
+  BOTTOMLEFT,
+  TOPLEFT
 }
 
 

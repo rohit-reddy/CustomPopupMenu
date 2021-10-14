@@ -5,10 +5,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.rohith.mycustompopupmenu.databinding.ActivityMainBinding
 import com.rohith.mycustompopupmenu.secondKit.OverflowMenuFactory
 import com.rohith.mycustompopupmenu.secondKit.PaytmOverflowMenu
-import com.rohith.mycustompopupmenu.secondKit.util.ArrowOrientation
-import com.rohith.mycustompopupmenu.secondKit.util.PopupMenuCenterAlign
+import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.PopupMenuAlignment
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,50 +20,55 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        binding.toolbar.toolbarList.setOnClickListener {
+            customListPaytmOverflowMenu = createPopupMenu(PopupMenuAlignment.TOPRIGHT) // TOPRIGHT
+            customListPaytmOverflowMenu?.show(it, 0, 0, PopupMenuAlignment.TOPRIGHT)
+        }
     }
 
     fun onClick(view: View) {
         when (view.id) {
             R.id.top_left -> {
-                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.TOP)
-                customListPaytmOverflowMenu?.showAlignBottom(view, 30, 36) // arrow will be pointing to top, container will be at the bottom
+                customListPaytmOverflowMenu = createPopupMenu(PopupMenuAlignment.TOPLEFT) // TOPLEFT
+                customListPaytmOverflowMenu?.show(view, 0, 0, PopupMenuAlignment.TOPLEFT)
             }
             R.id.top_right -> {
-                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.TOP)
-                customListPaytmOverflowMenu?.showAlignBottom(view, 0, 36)
+                customListPaytmOverflowMenu = createPopupMenu(PopupMenuAlignment.TOPRIGHT) // TOPRIGHT
+                customListPaytmOverflowMenu?.show(view, 0, 0, PopupMenuAlignment.TOPRIGHT)
             }
             R.id.bottom_left -> {
-                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.BOTTOM)
-                customListPaytmOverflowMenu?.showAlignTop(view, 0, -30)
+                customListPaytmOverflowMenu = createPopupMenu(PopupMenuAlignment.BOTTOMLEFT)   // BOTTOMLEFT
+                customListPaytmOverflowMenu?.show(view, 0, 0, PopupMenuAlignment.BOTTOMLEFT)
             }
             R.id.bottom_right -> {
-                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.BOTTOM)
-                customListPaytmOverflowMenu?.showAlignTop(view, 0, 0)
+                customListPaytmOverflowMenu = createPopupMenu(PopupMenuAlignment.BOTTOMRIGHT) // BOTTOMRIGHT
+                customListPaytmOverflowMenu?.show(view, 0, 0, PopupMenuAlignment.BOTTOMRIGHT)
             }
             R.id.center ->{
 //                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.BOTTOM)   // BOTTOMLEFT
-//                customListPaytmOverflowMenu?.showAtCenter(view, 0, 0, PopupMenuCenterAlign.TOP)
+//                customListPaytmOverflowMenu?.showAtCenter(view, 0, 0, PopupMenuCenterAlign.BOTTOMLEFT)
 
-                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.TOP) // TOPLEFT
-                customListPaytmOverflowMenu?.showAtCenter(view, 0, 0, PopupMenuCenterAlign.BOTTOM)
+                customListPaytmOverflowMenu = createPopupMenu(PopupMenuAlignment.TOPLEFT) // TOPLEFT
+                customListPaytmOverflowMenu?.show(view, 0, 0, PopupMenuAlignment.TOPLEFT)
             }
 
             R.id.center2 ->{
 //                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.TOP) // TOPRIGHT
-//                customListPaytmOverflowMenu?.showAtCenter(view, 0, 0, PopupMenuCenterAlign.END)
+//                customListPaytmOverflowMenu?.showAtCenter(view, 0, 0, PopupMenuCenterAlign.TOPRIGHT)
 
-                customListPaytmOverflowMenu = createPopupMenu(ArrowOrientation.BOTTOM) // BOTTOMRIGHT
-                customListPaytmOverflowMenu?.showAtCenter(view, 0, 0, PopupMenuCenterAlign.START)
+                customListPaytmOverflowMenu = createPopupMenu(PopupMenuAlignment.BOTTOMRIGHT) // BOTTOMRIGHT
+                customListPaytmOverflowMenu?.show(view, 0, 0, PopupMenuAlignment.BOTTOMRIGHT)
             }
         }
     }
 
 
 
-    fun createPopupMenu(value : ArrowOrientation) : PaytmOverflowMenu{
+    fun createPopupMenu(value : PopupMenuAlignment) : PaytmOverflowMenu{
         customListPaytmOverflowMenu?.dismiss()
         customListPaytmOverflowMenu = OverflowMenuFactory.getInstance(this, this, value)
 

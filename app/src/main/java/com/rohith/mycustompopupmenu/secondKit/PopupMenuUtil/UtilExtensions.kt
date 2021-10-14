@@ -1,6 +1,6 @@
 
 
-package com.rohith.mycustompopupmenu.secondKit.util
+package com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil
 
 import android.app.Activity
 import android.content.Context

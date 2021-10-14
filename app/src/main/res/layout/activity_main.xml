@@ -5,65 +5,81 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/darker_gray"
-    android:padding="10dp"
     tools:context=".MainActivity">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/top_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:onClick="onClick"
-        android:text="Top Left" />
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar_custom" />
 
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <Button
-        android:id="@+id/top_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:onClick="onClick"
-        android:text="TOP RIGHT" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/appBarLayout"
+        android:layout_marginTop="5dp">
 
-    <Button
-        android:id="@+id/bottom_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:onClick="onClick"
-        android:text="BOTTOM LEFT" />
-
-    <Button
-        android:id="@+id/bottom_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:onClick="onClick"
-        android:text="Bottom RIGHT" />
+        <Button
+            android:id="@+id/top_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:onClick="onClick"
+            android:text="Top Left" />
 
 
-    <Button
-        android:id="@+id/center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:onClick="onClick"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        android:text=":" />
+        <Button
+            android:id="@+id/top_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:onClick="onClick"
+            android:text="TOP RIGHT" />
+
+        <Button
+            android:id="@+id/bottom_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:onClick="onClick"
+            android:text="BOTTOM LEFT" />
+
+        <Button
+            android:id="@+id/bottom_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:onClick="onClick"
+            android:text="Bottom RIGHT" />
 
 
-    <Button
-        android:id="@+id/center2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="onClick"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        android:text=":" />
+        <Button
+            android:id="@+id/center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:onClick="onClick"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:text=":" />
+
+
+        <Button
+            android:id="@+id/center2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:onClick="onClick"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:text=":" />
+    </RelativeLayout>
 
 </RelativeLayout>
