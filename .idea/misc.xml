@@ -3,9 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.10162183429883899" />
+        <entry key="app/src/main/res/drawable/arrow_balloon_library_skydoves.xml" value="0.18489583333333334" />
+        <entry key="app/src/main/res/drawable/arrow_popup_menu.xml" value="0.18489583333333334" />
+        <entry key="app/src/main/res/drawable/ic_home.xml" value="0.18489583333333334" />
+        <entry key="app/src/main/res/drawable/ic_push_pin.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.5165794066317626" />
         <entry key="app/src/main/res/layout/custom_list_item.xml" value="0.20018115942028986" />
-        <entry key="app/src/main/res/layout/layout_custom_list.xml" value="0.20266835924983592" />
+        <entry key="app/src/main/res/layout/layout_balloon_library_skydoves.xml" value="0.18795289855072464" />
+        <entry key="app/src/main/res/layout/layout_custom_list.xml" value="0.33297297297297296" />
+        <entry key="app/src/main/res/layout/layout_custom_popup_menu.xml" value="0.19239251709702734" />
       </map>
     </option>
   </component>

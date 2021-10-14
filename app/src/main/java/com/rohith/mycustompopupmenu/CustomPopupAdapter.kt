@@ -1,6 +1,5 @@
 package com.rohith.mycustompopupmenu
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,13 +7,12 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.rohith.mycustompopupmenu.databinding.CustomListItemBinding
 
-class CustomPopupAdapter(
-    val context: Context
+class CustomPopupAdapter(private val callback: RecyclerviewCallbacks<CustomItem>
 ) : RecyclerView.Adapter<CustomPopupAdapter.CustomViewHolder>() {
 
 
     private val customItems = mutableListOf<CustomItem>()
-    var callback: RecyclerviewCallbacks<CustomItem>? = null
+    //var callback: RecyclerviewCallbacks<CustomItem>? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         val binding =
@@ -40,9 +38,9 @@ class CustomPopupAdapter(
         }
     }
 
-    fun setOnClick(click: RecyclerviewCallbacks<CustomItem>){
-        callback = click
-    }
+//    fun setOnClick(click: RecyclerviewCallbacks<CustomItem>){
+//        callback = click
+//    }
 
 
     override fun getItemCount() = this.customItems.size
