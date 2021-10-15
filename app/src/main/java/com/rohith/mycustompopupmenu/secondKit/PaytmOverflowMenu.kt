@@ -10,8 +10,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.Pair
 import android.view.*
 import android.widget.FrameLayout
@@ -27,9 +25,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import com.rohith.mycustompopupmenu.CustomPopupWindow
 import com.rohith.mycustompopupmenu.databinding.LayoutCustomPopupMenuBinding
-import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.*
-import com.rohith.mycustompopupmenu.secondKit.annotations.Dp
-import android.util.DisplayMetrics
+import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.*
+import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.Dp
 import android.util.TypedValue
 
 

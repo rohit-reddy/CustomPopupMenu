@@ -1,35 +1,20 @@
 
 
-package com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil
+package com.rohith.mycustompopupmenu.secondKit.popupMenuUtil
 
 import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.res.Resources
 import android.graphics.Point
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
-import androidx.activity.ComponentActivity
 import androidx.annotation.DimenRes
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
 
-/** px size to sp size. */
-internal fun Context.px2Sp(px: Float): Float {
-    val scale = resources.displayMetrics.scaledDensity
-    return (px / scale)
-}
-
-/** gets a dimension pixel size from dimension resource. */
-
-internal fun Context.dimenPixel(@DimenRes dimenRes: Int): Int {
-    return resources.getDimensionPixelSize(dimenRes)
-}
 
 /** gets a dimension size from dimension resource. */
 
@@ -43,28 +28,10 @@ internal fun Context.contextColor(resource: Int): Int {
     return ContextCompat.getColor(this, resource)
 }
 
-/** gets a drawable from the resource. */
-
-internal fun Context.contextDrawable(resource: Int): Drawable? {
-    return AppCompatResources.getDrawable(this, resource)
-}
 
 /** returns if an Activity is finishing or not. */
 internal val Context.isFinishing: Boolean
     inline get() = this is Activity && this.isFinishing
-
-/** returns an activity from a context. */
-
-internal fun Context.getActivity(): ComponentActivity? {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is ComponentActivity) {
-            return context
-        }
-        context = context.baseContext
-    }
-    return null
-}
 
 
 /** returns true if there is a start/left or end/right drawable in the array. */
@@ -142,17 +109,6 @@ internal fun View.getViewPointOnScreen(): Point {
     val location: IntArray = intArrayOf(0, 0)
     getLocationOnScreen(location)
     return Point(location[0], location[1])
-}
-
-/** returns the status bar height if the anchor is on the Activity. */
-
-internal fun View.getStatusBarHeight(isStatusBarVisible: Boolean): Int {
-    val rectangle = Rect()
-    val context = context
-    return if (context is Activity && isStatusBarVisible) {
-        context.window.decorView.getWindowVisibleDisplayFrame(rectangle)
-        rectangle.top
-    } else 0
 }
 
 

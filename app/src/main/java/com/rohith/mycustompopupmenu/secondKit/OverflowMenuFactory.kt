@@ -3,7 +3,7 @@ package com.rohith.mycustompopupmenu.secondKit
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import com.rohith.mycustompopupmenu.R
-import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.PopupMenuAlignment
+import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.PopupMenuAlignment
 
 class OverflowMenuFactory : PaytmOverflowMenu.Factory() {
 //class OverflowMenuFactory {

@@ -7,7 +7,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.rohith.mycustompopupmenu.databinding.CustomListItemBinding
 
-class CustomPopupAdapter(private val callback: RecyclerviewCallbacks<CustomItem>
+class CustomPopupAdapter(
+    private val callback: RecyclerviewCallbacks<CustomItem>
 ) : RecyclerView.Adapter<CustomPopupAdapter.CustomViewHolder>() {
 
 
@@ -23,7 +24,7 @@ class CustomPopupAdapter(private val callback: RecyclerviewCallbacks<CustomItem>
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val customItem = this.customItems[position]
         holder.binding.run {
-            if (customItem.icon != null){
+            if (customItem.icon != null) {
                 imageIcon.isVisible = true
                 imageIcon.setImageDrawable(customItem.icon)
             }

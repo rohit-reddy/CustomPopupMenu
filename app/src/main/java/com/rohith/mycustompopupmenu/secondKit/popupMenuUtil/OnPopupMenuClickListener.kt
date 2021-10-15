@@ -1,6 +1,6 @@
 
 
-package com.rohith.mycustompopupmenu.secondKit
+package com.rohith.mycustompopupmenu.secondKit.popupMenuUtil
 
 import android.view.MotionEvent
 import android.view.View
@@ -18,13 +18,6 @@ fun interface OnPopupMenuDismissListener {
 
   /** invoked when the [PaytmOverflowMenu] is dismissed. */
   fun onpopupmenuDismiss()
-}
-
-/** Interface definition for a callback to be invoked when a popupmenu view is initialized. */
-fun interface OnPopupMenuInitializedListener {
-
-  /** invoked when the [PaytmOverflowMenu] is initialized. */
-  fun onpopupmenuInitialized(contentView: View)
 }
 
 

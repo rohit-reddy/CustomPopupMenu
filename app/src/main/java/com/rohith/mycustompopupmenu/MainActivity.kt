@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rohith.mycustompopupmenu.databinding.ActivityMainBinding
 import com.rohith.mycustompopupmenu.secondKit.OverflowMenuFactory
 import com.rohith.mycustompopupmenu.secondKit.PaytmOverflowMenu
-import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.PopupMenuAlignment
+import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.PopupMenuAlignment
+import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.getCustomSamplesN
+import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.getCustomSamplesWithoutIconsN
 
 
 class MainActivity : AppCompatActivity() {
