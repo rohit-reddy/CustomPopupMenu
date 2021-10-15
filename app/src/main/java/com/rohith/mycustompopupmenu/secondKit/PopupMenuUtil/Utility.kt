@@ -28,14 +28,7 @@ enum class ArrowOrientationRules {
    * However, if there is not enough free space to place the tooltip at the bottom of the anchor,
    * tooltips will be placed on top of the anchor and the orientation of the arrow will be [ArrowOrientation.BOTTOM].
    */
-  ALIGN_ANCHOR,
-
-  /**
-   * Align to fixed [ArrowOrientation].
-   *
-   * The orientation of the arrow will be fixed by the specific [PaytmOverflowMenu.Builder.arrowAlignment].
-   */
-  ALIGN_FIXED
+  ALIGN_ANCHOR
 }
 
 
@@ -47,13 +40,6 @@ enum class ArrowOrientationRules {
  * [ArrowPositionRules.ALIGN_ANCHOR]: Align the arrow position depending on an anchor.
  */
 enum class ArrowPositionRules {
-  /**
-   * Align the arrow position depending on the balloon popup body.
-   *
-   * If [PaytmOverflowMenu.Builder.arrowPosition] is 0.5, the arrow will be located in the middle of the tooltip.
-   */
-  ALIGN_POPUPMENU,
-
   /**
    * Align the arrow position depending on an anchor.
    *
