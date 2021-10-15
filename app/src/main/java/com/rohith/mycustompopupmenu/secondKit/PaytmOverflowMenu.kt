@@ -690,7 +690,7 @@ fun show(
         private var backgroundColor: Int = Color.WHITE
 
         @Px
-        private var cornerRadius: Float = 6f.dp
+        private var cornerRadius: Float = 8f.dp
 
         @FloatRange(from = 0.0, to = 1.0)
         private var alpha: Float = 1f
