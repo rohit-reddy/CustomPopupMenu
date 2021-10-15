@@ -627,9 +627,9 @@ fun show(
     fun getMeasuredHeight(maxHeight : Int): Int {
         val tv = TypedValue()
         var actionBarHeight = 0
-//        if (context.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)){
-//            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.resources.displayMetrics)
-//        }
+        if (context.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)){
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.resources.displayMetrics)
+        }
         val displayHeight = displaySize.y
         println("Height:$displayHeight")
         return this.binding.root.measuredHeight.coerceAtMost(maxHeight - actionBarHeight)
