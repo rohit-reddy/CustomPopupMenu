@@ -18,14 +18,14 @@
   android:id="@+id/popupmenu"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-    tools:background="@android:color/holo_green_light">
+    android:background="@android:color/holo_green_light">
 
   <FrameLayout
     android:id="@+id/popupmenu_wrapper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:ignore="UselessParent"
-      tools:background="@android:color/holo_blue_light">
+      android:background="@android:color/holo_blue_light">
 
     <FrameLayout
       android:id="@+id/popupmenu_content"
@@ -34,7 +34,7 @@
       android:layout_gravity="center"
       android:clipChildren="false"
       android:clipToPadding="false"
-        tools:background="@android:color/holo_red_dark"
+        android:background="@android:color/holo_red_dark"
       android:padding="10dp">
 
       <com.rohith.mycustompopupmenu.secondKit.radius.RadiusLayout

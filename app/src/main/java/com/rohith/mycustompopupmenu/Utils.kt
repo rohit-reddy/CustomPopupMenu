@@ -5,19 +5,20 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 
-fun getCustomSamples(context: Context): List<CustomItem> {
+fun getCustomSamplesN(context: Context, numberOfItems : Int): List<CustomItem> {
     val samples = ArrayList<CustomItem>()
-    samples.add(CustomItem(drawable(context, R.drawable.ic_push_pin), "Pin"))
-    samples.add(CustomItem(drawable(context, R.drawable.ic_home), "Add to Home"))
-    samples.add(CustomItem(drawable(context, R.drawable.ic_delete), "Delete"))
+    for (i in 1..numberOfItems){
+        samples.add(CustomItem(drawable(context, R.drawable.icon_rg_24_system_bounding), "Label"))
+    }
+
     return samples
 }
 
-fun getCustomSamplesWithoutIcons(context: Context): List<CustomItem> {
+fun getCustomSamplesWithoutIconsN(context: Context, numberOfItems: Int): List<CustomItem> {
     val samples = ArrayList<CustomItem>()
-    samples.add(CustomItem(null, "Pin"))
-    samples.add(CustomItem(null, "Add to Home"))
-    samples.add(CustomItem(null, "Delete"))
+    for (i in 1..numberOfItems){
+        samples.add(CustomItem(null, "Label"))
+    }
     return samples
 }
 

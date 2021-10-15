@@ -3,12 +3,10 @@ package com.rohith.mycustompopupmenu.secondKit
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import com.rohith.mycustompopupmenu.R
-import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.ArrowPositionRules
 import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.PopupMenuAlignment
-import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.PopupMenuSizeSpec
 
-//class OverflowMenuFactory : PaytmOverflowMenu.Factory() {
-class OverflowMenuFactory {
+class OverflowMenuFactory : PaytmOverflowMenu.Factory() {
+//class OverflowMenuFactory {
 
     companion object {
         private var instance: PaytmOverflowMenu? = null
@@ -26,7 +24,7 @@ class OverflowMenuFactory {
         }
     }
 
-    fun create(
+    override fun create(
         context: Context,
         lifecycle: LifecycleOwner?,
         value: PopupMenuAlignment

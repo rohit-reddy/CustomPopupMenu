@@ -49,19 +49,6 @@ enum class ArrowPositionRules {
 }
 
 
-/**
- * A runnable class that implements [Runnable] for dismissing a [PaytmOverflowMenu]
- * if the [PaytmOverflowMenu.Builder.autoDismissDuration] has a value.
- */
-internal class AutoDismissRunnable(val paytmOverflowMenu: PaytmOverflowMenu) : Runnable {
-
-  /** dismiss a balloon. */
-  override fun run() {
-    paytmOverflowMenu.dismiss()
-  }
-}
-
-
 /** BalloonCenterAlign is an aligning rule for the [PaytmOverflowMenu.show]. */
 enum class PopupMenuAlignment {
   BOTTOMRIGHT,

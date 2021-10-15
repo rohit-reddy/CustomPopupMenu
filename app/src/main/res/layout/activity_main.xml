@@ -80,6 +80,17 @@
             android:textColor="@color/black"
             android:textStyle="bold"
             android:text=":" />
+
+        <Button
+            android:id="@+id/maxHeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/top_left"
+            android:onClick="onClick"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:text=":" />
     </RelativeLayout>
 
 </RelativeLayout>
