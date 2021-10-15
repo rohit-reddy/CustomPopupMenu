@@ -27,8 +27,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import com.rohith.mycustompopupmenu.CustomPopupWindow
 import com.rohith.mycustompopupmenu.databinding.LayoutCustomPopupMenuBinding
-import com.rohith.mycustompopupmenu.secondKit.annotations.Dp
 import com.rohith.mycustompopupmenu.secondKit.PopupMenuUtil.*
+import com.rohith.mycustompopupmenu.secondKit.annotations.Dp
 
 
 /**
@@ -205,13 +205,13 @@ class PaytmOverflowMenu(
         val shader: LinearGradient = when (builder.getArrowOrientation()) {
             PopupMenuAlignment.BOTTOMLEFT, PopupMenuAlignment.TOPLEFT -> {
                 LinearGradient(
-                    oldBitmap.width.toFloat() / 2 - builder.getArrowhalfSize(), 0f,
+                    oldBitmap.width.toFloat() / 2 - builder.getHalfArrowSize(), 0f,
                     oldBitmap.width.toFloat(), 0f, startColor, endColor, Shader.TileMode.CLAMP
                 )
             }
             PopupMenuAlignment.BOTTOMRIGHT, PopupMenuAlignment.TOPRIGHT -> {
                 LinearGradient(
-                    oldBitmap.width.toFloat() / 2 + builder.getArrowhalfSize(), 0f, 0f, 0f,
+                    oldBitmap.width.toFloat() / 2 + builder.getHalfArrowSize(), 0f, 0f, 0f,
                     startColor, endColor, Shader.TileMode.CLAMP
                 )
             }
@@ -229,8 +229,8 @@ class PaytmOverflowMenu(
             binding.popupmenuCard.height + 1
         )
 
-        val startColor: Int = bitmap.getPixel((x + builder.getArrowhalfSize()).toInt(), y.toInt())
-        val endColor: Int = bitmap.getPixel((x - builder.getArrowhalfSize()).toInt(), y.toInt())
+        val startColor: Int = bitmap.getPixel((x + builder.getHalfArrowSize()).toInt(), y.toInt())
+        val endColor: Int = bitmap.getPixel((x - builder.getHalfArrowSize()).toInt(), y.toInt())
 
     return Pair(startColor, endColor)
 }
@@ -425,9 +425,11 @@ fun show(
             PopupMenuAlignment.BOTTOMLEFT -> {
                 val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
                 val anchorX: Int = anchor.getViewPointOnScreen().x
+                val anchorRect = Rect()
+                anchor.getGlobalVisibleRect(anchorRect)
                 bodyWindow.showAsDropDown(
                     anchor,
-                    ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.getArrowhalfSize()).toInt()) + xOff,
+                    ((((anchorRect.right + anchorRect.left) / 2) - anchorRect.left - getMinArrowPosition().toInt() - builder.getHalfArrowSize()).toInt()) + xOff,
                     -getMeasuredHeight() - anchor.measuredHeight + yOff,
                     Gravity.START or Gravity.LEFT
                 )
@@ -436,9 +438,11 @@ fun show(
             PopupMenuAlignment.TOPLEFT -> {
                 val popupmenuX: Int = binding.popupmenuContent.getViewPointOnScreen().x
                 val anchorX: Int = anchor.getViewPointOnScreen().x
+                val anchorRect = Rect()
+                anchor.getGlobalVisibleRect(anchorRect)
                 bodyWindow.showAsDropDown(
                     anchor,
-                    ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.getArrowhalfSize()).toInt()) + xOff,
+                    (((anchorRect.right + anchorRect.left) / 2) - anchorRect.left - getMinArrowPosition().toInt() - builder.getHalfArrowSize()).toInt() + xOff,
                     yOff,
                     Gravity.START or Gravity.LEFT
                 )
@@ -446,18 +450,18 @@ fun show(
 
             PopupMenuAlignment.BOTTOMRIGHT -> {
                 val anchorX: Int = anchor.getViewPointOnScreen().x
-                //Get the height of 2/3rd of the height of the screen
 
-                //Get the height of 2/3rd of the height of the screen
                 val displayMetrics = context.resources.displayMetrics
                 val height = displayMetrics.heightPixels
                 val width = displayMetrics.widthPixels
                 println("Height:$height")
                 println("Width:$width")
+                val anchorRect = Rect()
+                anchor.getGlobalVisibleRect(anchorRect)
 
                 bodyWindow.showAsDropDown(
                     anchor,
-                    (-(anchor.right - ((anchorX + anchor.right) / 2)) + (getMinArrowPosition() + builder.getArrowSize() - SIZE_ARROW_BOUNDARY) - builder.getArrowhalfSize()).toInt() + xOff,
+                    (-(anchorRect.right - ((anchorRect.left + anchorRect.right) / 2)) + (getMinArrowPosition() + builder.getArrowSize() - SIZE_ARROW_BOUNDARY) - builder.getHalfArrowSize()).toInt() + xOff,
                     -getMeasuredHeight() - anchor.measuredHeight + yOff,
                     Gravity.RIGHT or Gravity.END
                 )
@@ -471,10 +475,12 @@ fun show(
                 val width = displayMetrics.widthPixels
                 println("Height:$height")
                 println("Width:$width")
+                val anchorRect = Rect()
+                anchor.getGlobalVisibleRect(anchorRect)
 
                 bodyWindow.showAsDropDown(
                     anchor,
-                    (-(anchor.right - ((anchorX + anchor.right) / 2)) + getMinArrowPosition().toInt() + builder.getArrowSize() - SIZE_ARROW_BOUNDARY - builder.getArrowhalfSize()).toInt() + xOff,
+                    (-(anchorRect.right - ((anchorRect.left + anchorRect.right) / 2)) + getMinArrowPosition().toInt() + builder.getArrowSize() - SIZE_ARROW_BOUNDARY - builder.getHalfArrowSize()).toInt() + xOff,
                     yOff, Gravity.RIGHT or Gravity.END
                 )
 
@@ -531,7 +537,7 @@ fun showAlignTop(anchor: View, xOff: Int = 0, yOff: Int = 0) {
         val anchorX: Int = anchor.getViewPointOnScreen().x
         bodyWindow.showAsDropDown(
             anchor,
-            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.getArrowhalfSize()).toInt()),
+            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.getHalfArrowSize()).toInt()),
             -getMeasuredHeight() - anchor.measuredHeight + yOff,
             Gravity.START or Gravity.LEFT
         )
@@ -553,7 +559,7 @@ fun showAlignBottom(anchor: View, xOff: Int = 0, yOff: Int = 0) {
         val anchorX: Int = anchor.getViewPointOnScreen().x
         bodyWindow.showAsDropDown(
             anchor,
-            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.getArrowhalfSize()).toInt()),
+            ((((anchor.right + anchorX) / 2) - anchorX - getMinArrowPosition().toInt() - builder.getHalfArrowSize()).toInt()),
             0,
             Gravity.START or Gravity.LEFT
         )
@@ -867,7 +873,7 @@ class Builder(private val context: Context) {
     private var isAttachedInDecor: Boolean = true
 
 
-    fun getArrowhalfSize() = this.arrowHalfSize
+    fun getHalfArrowSize() = this.arrowHalfSize
 
     fun getArrowSize() = this.arrowSize
 
