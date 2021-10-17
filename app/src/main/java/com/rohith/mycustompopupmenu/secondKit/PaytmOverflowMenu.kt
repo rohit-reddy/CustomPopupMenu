@@ -3,22 +3,18 @@ package com.rohith.mycustompopupmenu.secondKit
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
-import android.util.Pair
+import android.util.TypedValue
 import android.view.*
 import android.widget.FrameLayout
 import androidx.annotation.*
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.forEach
-import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -26,8 +22,6 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.rohith.mycustompopupmenu.CustomPopupWindow
 import com.rohith.mycustompopupmenu.databinding.LayoutCustomPopupMenuBinding
 import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.*
-import com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.Dp
-import android.util.TypedValue
 
 
 /**
@@ -114,10 +108,6 @@ class PaytmOverflowMenu(
         with(binding.popupmenuArrow) {
             layoutParams = FrameLayout.LayoutParams(builder.getArrowSize(), builder.getArrowSize())
             alpha = builder.getAlpha()
-            ImageViewCompat.setImageTintList(
-                this,
-                ColorStateList.valueOf(builder.getBackgroundColor())
-            )
             runOnAfterSDK21 {
                 outlineProvider = ViewOutlineProvider.BOUNDS
             }
@@ -131,105 +121,16 @@ class PaytmOverflowMenu(
                         x = getArrowConstraintPositionX(anchor)
                         y =
                             binding.popupmenuCard.y + binding.popupmenuCard.height - SIZE_ARROW_BOUNDARY
-                        foreground = BitmapDrawable(
-                            resources,
-                            adjustArrowColorByMatchingCardBackground(
-                                this, x,
-                                binding.popupmenuCard.height.toFloat()
-                            )
-                        )
                     }
                     PopupMenuAlignment.TOPLEFT, PopupMenuAlignment.TOPRIGHT -> {
                         rotation = 0f
                         x = getArrowConstraintPositionX(anchor)
                         y = binding.popupmenuCard.y - builder.getArrowSize() + SIZE_ARROW_BOUNDARY
-                        foreground =
-                            BitmapDrawable(
-                                resources,
-                                adjustArrowColorByMatchingCardBackground(this, x, 0f)
-                            )
                     }
                 }
                 visible(true)
             }
         }
-    }
-
-    /**
-     * Calculate the color at arrow position from popupmenuCard. The color is then set as a foreground to the arrow.
-     *
-     * @param imageView the arrow imageview containing the drawable.
-     * @param x x position of the point where the middle of the arrow is connected to the popupmenu
-     * @param y y position of the point where the middle of the arrow is connected to the popupmenu
-     *
-     * @throws IllegalArgumentException Throws an exception when the arrow is attached outside the popupmenu.
-     *
-     */
-    private fun adjustArrowColorByMatchingCardBackground(
-        imageView: AppCompatImageView,
-        x: Float,
-        y: Float
-    ): Bitmap {
-        imageView.setColorFilter(builder.getBackgroundColor(), PorterDuff.Mode.SRC_IN)
-        val oldBitmap = drawableToBitmap(
-            imageView.drawable, imageView.drawable.intrinsicWidth,
-            imageView.drawable.intrinsicHeight
-        )
-        val colors: Pair<Int, Int>
-        try {
-            colors = getColorsFrompopupmenuCard(x, y)
-        } catch (e: IllegalArgumentException) {
-            throw IllegalArgumentException(
-                "Arrow attached outside popupmenu. Could not get a matching color."
-            )
-        }
-        val startColor = colors.first
-        val endColor = colors.second
-
-        val updatedBitmap =
-            Bitmap.createBitmap(oldBitmap.width, oldBitmap.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(updatedBitmap)
-        canvas.drawBitmap(oldBitmap, 0f, 0f, null)
-        val paint = Paint()
-        val shader: LinearGradient = when (builder.getArrowOrientation()) {
-            PopupMenuAlignment.BOTTOMLEFT, PopupMenuAlignment.TOPLEFT -> {
-                LinearGradient(
-                    oldBitmap.width.toFloat() / 2 - builder.getHalfArrowSize(), 0f,
-                    oldBitmap.width.toFloat(), 0f, startColor, endColor, Shader.TileMode.CLAMP
-                )
-            }
-            PopupMenuAlignment.BOTTOMRIGHT, PopupMenuAlignment.TOPRIGHT -> {
-                LinearGradient(
-                    oldBitmap.width.toFloat() / 2 + builder.getHalfArrowSize(), 0f, 0f, 0f,
-                    startColor, endColor, Shader.TileMode.CLAMP
-                )
-            }
-        }
-        paint.shader = shader
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawRect(0f, 0f, oldBitmap.width.toFloat(), oldBitmap.height.toFloat(), paint)
-        imageView.setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.SRC_IN)
-        return updatedBitmap
-    }
-
-    private fun getColorsFrompopupmenuCard(x: Float, y: Float): Pair<Int, Int> {
-        val bitmap = drawableToBitmap(
-            binding.popupmenuCard.background, binding.popupmenuCard.width + 1,
-            binding.popupmenuCard.height + 1
-        )
-
-        val startColor: Int = bitmap.getPixel((x + builder.getHalfArrowSize()).toInt(), y.toInt())
-        val endColor: Int = bitmap.getPixel((x - builder.getHalfArrowSize()).toInt(), y.toInt())
-
-        return Pair(startColor, endColor)
-    }
-
-    private fun drawableToBitmap(drawable: Drawable, width: Int, height: Int): Bitmap {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return bitmap
     }
 
     /**

@@ -4,14 +4,15 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/arrow_balloon_library_skydoves.xml" value="0.18489583333333334" />
-        <entry key="app/src/main/res/drawable/arrow_popup_menu.xml" value="0.18489583333333334" />
+        <entry key="app/src/main/res/drawable/arrow_popup_menu.xml" value="0.417833603544433" />
         <entry key="app/src/main/res/drawable/ic_home.xml" value="0.18489583333333334" />
         <entry key="app/src/main/res/drawable/ic_push_pin.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/shadow.xml" value="0.20462962962962963" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3462807304567769" />
         <entry key="app/src/main/res/layout/custom_list_item.xml" value="0.24149956408020923" />
         <entry key="app/src/main/res/layout/layout_balloon_library_skydoves.xml" value="0.18795289855072464" />
         <entry key="app/src/main/res/layout/layout_custom_list.xml" value="0.33297297297297296" />
-        <entry key="app/src/main/res/layout/layout_custom_popup_menu.xml" value="0.8312715506258116" />
+        <entry key="app/src/main/res/layout/layout_custom_popup_menu.xml" value="10.0" />
         <entry key="app/src/main/res/layout/toolbar_custom.xml" value="0.16847826086956522" />
       </map>
     </option>

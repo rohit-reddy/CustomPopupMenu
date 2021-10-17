@@ -14,48 +14,47 @@
   limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:id="@+id/popupmenu"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-    tools:background="@android:color/holo_green_light">
-
-  <FrameLayout
-    android:id="@+id/popupmenu_wrapper"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/popupmenu"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:ignore="UselessParent"
-      tools:background="@android:color/holo_blue_light">
+    tools:background="@android:color/holo_green_light">
 
     <FrameLayout
-      android:id="@+id/popupmenu_content"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout_gravity="center"
-      android:clipChildren="false"
-      android:clipToPadding="false"
-        tools:background="@android:color/holo_red_dark"
-      android:padding="11dp">
-
-      <com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.radiusLayout.RadiusLayout
-        android:id="@+id/popupmenu_card"
+        android:id="@+id/popupmenu_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-          android:background="@android:color/white"/>
+        tools:background="@android:color/holo_blue_light"
+        tools:ignore="UselessParent">
+
+        <FrameLayout
+            android:id="@+id/popupmenu_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:padding="11dp"
+            tools:background="@android:color/holo_red_dark">
+
+            <com.rohith.mycustompopupmenu.secondKit.popupMenuUtil.radiusLayout.RadiusLayout
+                android:id="@+id/popupmenu_card"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:background="@android:color/white" />
+
+        </FrameLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/popupmenu_arrow"
+            android:layout_width="16dp"
+            android:layout_height="11dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/arrow_popup_menu"
+            android:visibility="invisible"
+            tools:visibility="visible" />
 
     </FrameLayout>
-
-    <androidx.appcompat.widget.AppCompatImageView
-      android:id="@+id/popupmenu_arrow"
-      android:layout_width="16dp"
-      android:layout_height="11dp"
-      android:scaleType="fitXY"
-      android:src="@drawable/arrow_popup_menu"
-      android:tint="@android:color/white"
-        android:visibility="invisible"
-      />
-
-  </FrameLayout>
 
 </FrameLayout>
